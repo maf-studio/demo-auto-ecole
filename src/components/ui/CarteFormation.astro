@@ -1,0 +1,122 @@
+---
+import Icone from './Icone.astro'
+import Visuel from './Visuel.astro'
+import type { Visuel as MotifVisuel } from '../../data/formations.ts'
+
+/**
+ * Une carte de formation : visuel dessiné aux couleurs de la marque (panneau
+ * rond et pictogramme de la formation), titre, résumé, lien. Toute la carte
+ * est cliquable (un seul lien).
+ */
+interface Props {
+  titre: string
+  resume: string
+  href: string
+  motif: MotifVisuel
+  lienTexte?: string
+  niveau?: 2 | 3
+}
+
+const {
+  titre,
+  resume,
+  href,
+  motif,
+  lienTexte = 'Découvrir la formation',
+  niveau = 3,
+} = Astro.props
+const Titre = `h${niveau}` as const
+---
+
+<article class="carte carte-formation" data-revele>
+  <div class="carte-formation__media">
+    <Visuel motif={motif} class="carte-formation__visuel" />
+  </div>
+  <div class="carte-formation__corps">
+    <Titre class="carte-formation__titre">
+      <a href={href} class="carte__lien">{titre}</a>
+    </Titre>
+    <p class="carte-formation__resume">{resume}</p>
+    <span class="lien-fleche carte-formation__lien" aria-hidden="true">
+      {lienTexte}
+      <Icone nom="fleche" />
+    </span>
+  </div>
+</article>
+
+<style>
+  .carte-formation {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition:
+      transform var(--duree) var(--courbe),
+      box-shadow var(--duree) var(--courbe);
+  }
+
+  .carte-formation:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ombre-forte);
+  }
+
+  .carte-formation__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--nuit);
+  }
+
+  .carte-formation__media::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    height: 5px;
+    background: var(--petrole);
+    transform-origin: left;
+    transform: scaleX(0.25);
+    transition: transform var(--duree-longue) var(--courbe);
+  }
+
+  .carte-formation:hover .carte-formation__media::after {
+    transform: scaleX(1);
+  }
+
+  .carte-formation__media :global(.carte-formation__visuel) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duree-longue) var(--courbe);
+  }
+
+  .carte-formation:hover :global(.carte-formation__visuel) {
+    transform: scale(1.04);
+  }
+
+  .carte-formation__corps {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--e-3);
+    padding: var(--e-5);
+  }
+
+  .carte-formation__titre {
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.85rem);
+  }
+
+  .carte-formation__titre a {
+    color: var(--encre);
+    text-decoration: none;
+  }
+
+  .carte-formation__resume {
+    color: var(--texte-doux);
+    font-size: 0.97rem;
+  }
+
+  .carte-formation__lien {
+    margin-block-start: auto;
+    padding-block-start: var(--e-2);
+  }
+</style>

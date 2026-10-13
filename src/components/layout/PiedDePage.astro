@@ -1,0 +1,291 @@
+---
+import Horaires from '../ui/Horaires.astro'
+import Icone from '../ui/Icone.astro'
+import Logo from '../ui/Logo.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { formationsDe } from '../../data/formations.ts'
+
+const e = ETABLISSEMENT
+const auto = formationsDe('auto')
+const moto = formationsDe('moto')
+const annee = new Date().getFullYear()
+---
+
+<footer class="pied surface-nuit">
+  <div class="pied__route ligne-route" aria-hidden="true"></div>
+  <div class="conteneur pied__grille">
+    <div class="pied__marque">
+      <a href="/" class="pied__logo" aria-label={`${e.nom}, accueil`}><Logo id="logo-pied" /></a>
+      <p class="texte-doux">
+        Auto-école et moto-école à {e.adresse.ville} depuis {e.anneeCreation} : code de la route, permis B en boîte manuelle
+        ou automatique, conduite accompagnée, permis moto A1 et A2.
+      </p>
+      {
+        e.reseaux.length > 0 && (
+          <div class="pied__reseaux">
+            <p class="signature pied__suivez">Suivez-nous !</p>
+            <ul>
+              {e.reseaux.map((r) => (
+                <li>
+                  <a href={r.url} target="_blank" rel="noopener me">
+                    <Icone nom={r.nom === 'Instagram' ? 'instagram' : 'snapchat'} />
+                    <span class="visuellement-masque">
+                      {r.nom} {e.identifiantReseaux} (nouvel onglet)
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {e.identifiantReseaux && <span class="pied__identifiant">{e.identifiantReseaux}</span>}
+          </div>
+        )
+      }
+    </div>
+
+    <nav class="pied__colonne" aria-labelledby="pied-formations">
+      <h2 id="pied-formations" class="pied__titre">Formations</h2>
+      <ul>
+        <li><a href="/code-de-la-route">Code de la route</a></li>
+        {auto.map((f) => <li><a href={`/${f.slug}`}>{f.nomCourt}</a></li>)}
+        {moto.map((f) => <li><a href={`/${f.slug}`}>{f.nomCourt}</a></li>)}
+      </ul>
+    </nav>
+
+    <nav class="pied__colonne" aria-labelledby="pied-pratique">
+      <h2 id="pied-pratique" class="pied__titre">Infos pratiques</h2>
+      <ul>
+        <li><a href="/financement">Financement</a></li>
+        <li><a href="/tarifs">Tarifs et devis</a></li>
+        <li><a href="/documents-inscription">Documents d’inscription</a></li>
+        <li><a href="/a-propos">L’auto-école</a></li>
+        <li><a href="/avis-clients">Avis des élèves</a></li>
+        <li><a href="/demarche-qualite">Démarche qualité</a></li>
+        <li>
+          <a href={e.google.fiche} target="_blank" rel="noopener">
+            Notre fiche Google<span class="visuellement-masque"> (nouvel onglet)</span>
+          </a>
+        </li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="pied__colonne pied__contact">
+      <h2 class="pied__titre">Nous trouver</h2>
+      <address>
+        <a href={e.google.itineraire} target="_blank" rel="noopener" class="pied__ligne">
+          <Icone nom="adresse" />
+          <span>{e.adresse.rue}<br />{e.adresse.codePostal} {e.adresse.ville}</span>
+        </a>
+        <a href={e.telephone.lien} class="pied__ligne pied__tel">
+          <Icone nom="telephone" /><span>{e.telephone.affiche}</span>
+        </a>
+        <a href={`mailto:${e.email}`} class="pied__ligne">
+          <Icone nom="email" /><span>{e.email}</span>
+        </a>
+      </address>
+      <Horaires titre="Bureau" horaires={e.horairesBureau} class="pied__horaires" />
+      <Horaires titre="Conduite" horaires={e.horairesConduite} class="pied__horaires" />
+    </div>
+  </div>
+
+  <div class="pied__bande">
+    <div class="conteneur pied__bande-contenu">
+      <p>
+        {e.nom} · N° d’agrément : {e.agrement} · © {annee}
+      </p>
+      <ul>
+        <li><a href="/mentions-legales">Mentions légales</a></li>
+        <li><a href="/confidentialite">Confidentialité</a></li>
+        <li><a href="/cookies">Cookies</a></li>
+        <li><a href="/plan-du-site">Plan du site</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pied {
+    position: relative;
+    margin-block-start: 0;
+  }
+
+  .pied__route {
+    color: var(--petrole);
+    opacity: 0.55;
+  }
+
+  .pied__grille {
+    display: grid;
+    gap: var(--e-7) var(--e-6);
+    padding-block: var(--e-8) var(--e-7);
+  }
+
+  .pied__logo {
+    display: block;
+    width: 10rem;
+    margin-block-end: var(--e-5);
+  }
+
+  .pied__marque p {
+    max-width: 24rem;
+    font-size: var(--taille-petit);
+  }
+
+  .pied__reseaux {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3);
+    margin-block-start: var(--e-5);
+  }
+
+  .pied__suivez {
+    font-size: 1.35rem;
+    color: var(--petrole-clair);
+  }
+
+  .pied__reseaux ul {
+    display: flex;
+    gap: var(--e-2);
+    list-style: none;
+  }
+
+  .pied__reseaux a {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: 50%;
+    color: var(--sur-nuit);
+    transition: background-color var(--duree) var(--courbe), color var(--duree) var(--courbe);
+  }
+
+  .pied__reseaux a:hover {
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+  }
+
+  .pied__reseaux svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .pied__identifiant {
+    font-weight: 700;
+    font-size: var(--taille-petit);
+  }
+
+  .pied__titre {
+    margin-block-end: var(--e-4);
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    color: var(--sur-nuit);
+  }
+
+  .pied__colonne ul {
+    list-style: none;
+    display: grid;
+    gap: var(--e-1);
+  }
+
+  .pied__colonne a {
+    display: inline-block;
+    padding-block: 0.3rem;
+    color: var(--sur-nuit-doux);
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+
+  .pied__colonne a:hover {
+    color: var(--sur-nuit);
+    text-decoration: underline;
+  }
+
+  .pied__contact address {
+    display: grid;
+    gap: var(--e-2);
+    font-style: normal;
+    margin-block-end: var(--e-5);
+  }
+
+  .pied__colonne .pied__ligne {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    gap: var(--e-3);
+    align-items: start;
+    color: var(--sur-nuit);
+  }
+
+  .pied__ligne svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-block-start: 0.15rem;
+    color: var(--petrole-clair);
+  }
+
+  .pied__colonne .pied__tel {
+    font-family: var(--police-titre);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .pied__contact :global(.pied__horaires) {
+    font-size: var(--taille-petit);
+    margin-block-start: var(--e-4);
+  }
+
+  .pied__contact :global(.horaires__titre) {
+    font-size: 1.05rem;
+    margin-block-end: var(--e-2);
+  }
+
+  .pied__bande {
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+    font-size: var(--taille-petit);
+  }
+
+  .pied__bande-contenu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e-2) var(--e-5);
+    padding-block: var(--e-4);
+  }
+
+  .pied__bande p {
+    font-family: var(--police-titre);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .pied__bande ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--e-4);
+    list-style: none;
+  }
+
+  .pied__bande a {
+    display: inline-block;
+    padding-block: 0.35rem;
+    color: var(--blanc);
+  }
+
+  @media (min-width: 40rem) {
+    .pied__grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .pied__grille {
+      grid-template-columns: 1.3fr 0.9fr 0.9fr 1.2fr;
+    }
+  }
+</style>

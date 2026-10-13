@@ -1,0 +1,59 @@
+---
+/** Le fil d’Ariane, en haut des pages intérieures (données structurées : Base.astro). */
+interface Props {
+  etapes: ReadonlyArray<{ libelle: string; href: string }>
+}
+const { etapes } = Astro.props
+---
+
+<nav class="fil-ariane" aria-label="Fil d’Ariane">
+  <ol>
+    {
+      etapes.map((etape, i) => (
+        <li>
+          {i < etapes.length - 1 ? (
+            <a href={etape.href}>{etape.libelle}</a>
+          ) : (
+            <span aria-current="page">{etape.libelle}</span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .fil-ariane ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+    list-style: none;
+    font-size: var(--taille-petit);
+    color: var(--sur-nuit-doux);
+  }
+
+  .fil-ariane li + li::before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-inline: 0.6em;
+    border-block: 0.28em solid transparent;
+    border-inline-start: 0.42em solid var(--petrole-clair);
+    vertical-align: 0.08em;
+  }
+
+  .fil-ariane a {
+    color: var(--sur-nuit-doux);
+    text-decoration: none;
+  }
+
+  .fil-ariane a:hover {
+    color: var(--sur-nuit);
+    text-decoration: underline;
+  }
+
+  .fil-ariane [aria-current] {
+    color: var(--sur-nuit);
+  }
+</style>

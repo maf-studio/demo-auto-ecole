@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro'
+import PageMessage from '../components/sections/PageMessage.astro'
+import Icone from '../components/ui/Icone.astro'
+import { DEMONSTRATION } from '../data/demonstration.ts'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+---
+
+<Base titre="Demande envoyée" description="Votre demande a bien été transmise à Votre Auto-École." noindex>
+  <PageMessage icone="coche" ton="succes">
+    <Fragment slot="titre">Demande <span class="accent">{DEMONSTRATION ? 'validée' : 'envoyée'}</span></Fragment>
+    {
+      DEMONSTRATION ? (
+        <p>
+          Sur ce site de démonstration, rien n’est envoyé. Sur votre site, la demande arrive aussitôt dans votre boîte
+          e-mail, avec les coordonnées de l’élève et la formation choisie.
+        </p>
+      ) : (
+        <>
+          <p>Merci ! Votre demande est bien arrivée. Nous vous recontactons par téléphone ou par e-mail, aux horaires du bureau.</p>
+          <p>Pour une question urgente : {ETABLISSEMENT.telephone.affiche}.</p>
+        </>
+      )
+    }
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/">Retour à l’accueil</a>
+      <a class="bouton bouton--contour-clair" href="/documents-inscription">
+        <Icone nom="document" /> Préparer mon dossier
+      </a>
+    </Fragment>
+  </PageMessage>
+</Base>

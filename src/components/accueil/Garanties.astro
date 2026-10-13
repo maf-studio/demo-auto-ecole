@@ -1,0 +1,206 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+import Etoiles from '../ui/Etoiles.astro'
+import Icone, { type NomIcone } from '../ui/Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { dateRelevee, noteFr } from '../../lib/format.ts'
+
+/**
+ * Des garanties vérifiables : seulement des faits confirmés, chacun avec sa
+ * source. Le label et Qualiopi viennent du dépliant de l’établissement ; la
+ * garantie financière et un taux de réussite n’apparaissent que renseignés
+ * dans `etablissement.ts`.
+ */
+const e = ETABLISSEMENT
+type Garantie = { icone: NomIcone; titre: string; texte: string; lien?: { libelle: string; href: string } }
+
+const garanties: Garantie[] = [
+  ...e.labels.map((l) => ({
+    icone: 'label' as const,
+    titre: l.nom,
+    texte: l.explication,
+    ...(l.lien ? { lien: { libelle: 'Le texte du label', href: l.lien } } : {}),
+  })),
+  {
+    icone: 'bouclier',
+    titre: 'Agrément préfectoral',
+    texte: `L’établissement est agréé par la préfecture sous le numéro ${e.agrement}, obligatoire pour enseigner la conduite.`,
+  },
+  ...(e.garantieFinanciere
+    ? [
+        {
+          icone: 'euro' as const,
+          titre: 'Garantie financière',
+          texte: `Les prestations payées d’avance et non consommées sont remboursées si l’école ne peut plus assurer la formation${e.garantieFinanciere.garant ? ` (garant : ${e.garantieFinanciere.garant})` : ''}.`,
+        },
+      ]
+    : []),
+]
+const taux = e.tauxReussite
+const note = e.noteGoogle
+---
+
+<section class="section section--gris garanties" aria-labelledby="titre-garanties">
+  <div class="conteneur">
+    <div class="garanties__haut">
+      <EnteteSection etiquette="Nos engagements" id="titre-garanties">
+        <Fragment slot="titre">Des garanties <span class="accent">vérifiables</span></Fragment>
+        Un label de l’État, une certification qualité, un agrément : des engagements contrôlés, pas des promesses.
+      </EnteteSection>
+      {
+        note && (
+          <a class="garanties__note carte" href={e.google.fiche} target="_blank" rel="noopener">
+            <span class="garanties__chiffre">{noteFr(note.note)}/5</span>
+            <Etoiles note={note.note} />
+            <span class="texte-doux">
+              {note.nombreAvis} avis Google, relevé {dateRelevee(note.releveLe)}
+              <span class="visuellement-masque"> (nouvel onglet)</span>
+            </span>
+          </a>
+        )
+      }
+    </div>
+
+    <ul class="garanties__liste">
+      {
+        garanties.map((g, i) => (
+          <li class="garantie carte" data-revele style={`--rang: ${i}`}>
+            <span class="garantie__icone">
+              <Icone nom={g.icone} />
+            </span>
+            <h3 class="garantie__titre">{g.titre}</h3>
+            <p class="garantie__texte">{g.texte}</p>
+            {g.lien && (
+              <a class="lien-fleche garantie__lien" href={g.lien.href} target="_blank" rel="noopener">
+                {g.lien.libelle} <Icone nom="externe" />
+                <span class="visuellement-masque">(nouvel onglet)</span>
+              </a>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      taux && (
+        <p class="garanties__taux">
+          <strong>
+            {taux.taux} % de réussite au permis {taux.categorie} en {taux.annee}
+          </strong>
+          <span class="texte-doux"> · Source : {taux.source}</span>
+        </p>
+      )
+    }
+
+    <a class="lien-fleche garanties__suite" href="/demarche-qualite">
+      Notre démarche qualité <Icone nom="fleche" />
+    </a>
+  </div>
+</section>
+
+<style>
+  .garanties__haut {
+    display: grid;
+    gap: var(--e-5);
+    align-items: end;
+    margin-block-end: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  }
+
+  .garanties__haut :global(.entete-section) {
+    margin: 0;
+  }
+
+  .garanties__note {
+    display: grid;
+    justify-items: start;
+    gap: var(--e-2);
+    padding: var(--e-5);
+    color: var(--encre);
+    text-decoration: none;
+    box-shadow: none;
+  }
+
+  .garanties__note :global(.etoiles) {
+    font-size: 1.3rem;
+  }
+
+  .garanties__chiffre {
+    font-family: var(--police-titre);
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .garanties__note .texte-doux {
+    font-size: var(--taille-petit);
+  }
+
+  .garanties__liste {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .garantie {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    padding: var(--e-6) var(--e-5) var(--e-5);
+    box-shadow: none;
+  }
+
+  .garantie__icone {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 4px solid var(--or);
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--or);
+  }
+
+  .garantie__icone :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .garantie__titre {
+    font-size: 1.45rem;
+  }
+
+  .garantie__texte {
+    color: var(--texte-doux);
+    font-size: 0.96rem;
+  }
+
+  .garantie__lien {
+    margin-block-start: auto;
+    padding-block-start: var(--e-2);
+    font-size: 1rem;
+  }
+
+  .garanties__taux {
+    margin-block-start: var(--e-5);
+  }
+
+  .garanties__suite {
+    margin-block-start: var(--e-6);
+  }
+
+  @media (min-width: 40rem) {
+    .garanties__liste {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .garanties__haut {
+      grid-template-columns: 1fr auto;
+    }
+
+    .garanties__liste {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

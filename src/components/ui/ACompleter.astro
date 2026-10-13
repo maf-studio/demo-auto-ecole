@@ -1,0 +1,14 @@
+---
+/**
+ * Une information légale manquante, signalée de façon visible (jamais
+ * inventée). `pnpm check:publication` refuse la mise en ligne tant qu’il en
+ * reste.
+ */
+interface Props {
+  valeur: string | null | undefined
+  libelle: string
+}
+const { valeur, libelle } = Astro.props
+---
+
+{valeur ? <>{valeur}</> : <span class="a-completer" data-a-completer>À compléter : {libelle}</span>}

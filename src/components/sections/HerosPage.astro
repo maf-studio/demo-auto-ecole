@@ -1,0 +1,112 @@
+---
+import FilAriane from '../ui/FilAriane.astro'
+
+/**
+ * Le haut d’une page intérieure : fil d’Ariane, titre (slot `titre`, avec au
+ * plus un mot `accent`), chapô (slot par défaut), actions (slot `actions`),
+ * visuel facultatif à droite (slot `visuel`), bas de héros (slot `bas`).
+ */
+interface Props {
+  filAriane: ReadonlyArray<{ libelle: string; href: string }>
+  surTitre?: string
+}
+
+const { filAriane, surTitre } = Astro.props
+const avecVisuel = Astro.slots.has('visuel')
+---
+
+<section class="heros-page surface-nuit">
+  <div class="heros-page__bandes" aria-hidden="true"><span></span><span></span></div>
+  <div class="conteneur">
+    <FilAriane etapes={filAriane} />
+    <div class:list={['heros-page__grille', { 'heros-page__grille--visuel': avecVisuel }]}>
+      <div class="heros-page__texte">
+        {surTitre && <p class="heros-page__surtitre">{surTitre}</p>}
+        <h1 class="heros-page__titre"><slot name="titre" /></h1>
+        {Astro.slots.has('default') && <p class="chapo heros-page__chapo"><slot /></p>}
+        {Astro.slots.has('actions') && <div class="boutons heros-page__actions"><slot name="actions" /></div>}
+      </div>
+      {avecVisuel && <div class="heros-page__visuel"><slot name="visuel" /></div>}
+    </div>
+    <slot name="bas" />
+  </div>
+  <div class="heros-page__route ligne-route" aria-hidden="true"></div>
+</section>
+
+<style>
+  .heros-page {
+    position: relative;
+    overflow: hidden;
+    padding-block: var(--e-6) clamp(3.5rem, 2.5rem + 3vw, 5.5rem);
+    background:
+      radial-gradient(70% 90% at 90% 10%, rgb(57 139 164 / 0.3), transparent 65%),
+      var(--nuit);
+  }
+
+  .heros-page__bandes span {
+    position: absolute;
+    inset-block: -10%;
+    background: var(--petrole);
+    transform: skewX(var(--biais));
+  }
+
+  .heros-page__bandes span:first-child {
+    inset-inline-end: 8%;
+    width: 7rem;
+    opacity: 0.1;
+  }
+
+  .heros-page__bandes span:last-child {
+    inset-inline-end: calc(8% + 8.5rem);
+    width: 1.6rem;
+    opacity: 0.16;
+  }
+
+  .heros-page .conteneur {
+    position: relative;
+  }
+
+  .heros-page__grille {
+    display: grid;
+    gap: var(--e-7);
+    align-items: center;
+    margin-block-start: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+
+  .heros-page__surtitre {
+    margin-block-end: var(--e-3);
+    font-family: var(--police-titre);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--petrole-clair);
+  }
+
+  .heros-page__titre {
+    font-size: var(--taille-h1);
+    line-height: 0.92;
+  }
+
+  .heros-page__chapo {
+    margin-block-start: var(--e-5);
+    text-wrap: balance;
+  }
+
+  .heros-page__actions {
+    margin-block-start: var(--e-6);
+  }
+
+  .heros-page__route {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 1.25rem;
+    color: rgb(255 255 255 / 0.16);
+  }
+
+  @media (min-width: 64rem) {
+    .heros-page__grille--visuel {
+      grid-template-columns: 1.15fr 0.85fr;
+    }
+  }
+</style>

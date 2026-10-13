@@ -1,0 +1,820 @@
+---
+import { Picture } from 'astro:assets'
+import type { GetStaticPaths } from 'astro'
+
+import Base from '../layouts/Base.astro'
+import FormulaireDemande from '../components/formulaire/FormulaireDemande.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Questions from '../components/sections/Questions.astro'
+import CarteFormation from '../components/ui/CarteFormation.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import Visuel from '../components/ui/Visuel.astro'
+import { PHOTOS_FORMATIONS } from '../data/photos.ts'
+import { piecesPour } from '../data/documents.ts'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { financement } from '../data/financements.ts'
+import { FORMATIONS, formation as trouver, prixAffiche, type Formation } from '../data/formations.ts'
+import { DERNIERE_VERIFICATION, SOURCES } from '../data/sources.ts'
+import { dateLongue, euros } from '../lib/format.ts'
+import { serviceEnvoiConfigure } from '../lib/demande/configuration.ts'
+
+export const getStaticPaths = (() =>
+  FORMATIONS.map((f) => ({ params: { formation: f.slug }, props: { f } }))) satisfies GetStaticPaths
+
+interface Props {
+  f: Formation
+}
+
+const { f } = Astro.props
+const e = ETABLISSEMENT
+const brouillon = f.statut === 'brouillon'
+const photo = PHOTOS_FORMATIONS[f.slug] ?? null
+const pieces = piecesPour(f.slug)
+const liees = f.liees.map(trouver).filter((x) => x.statut === 'publiee')
+const rubrique =
+  f.categorie === 'moto'
+    ? { libelle: 'Permis moto', href: '/permis-moto' }
+    : f.categorie === 'auto'
+      ? { libelle: 'Permis auto', href: '/permis-auto' }
+      : null
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  ...(rubrique ? [rubrique] : []),
+  { libelle: f.nomCourt, href: `/${f.slug}` },
+]
+const lienDevis = `/contact?formation=${f.slug}#demande`
+const formulaireActif = serviceEnvoiConfigure()
+
+const sommaire = [
+  { id: 'presentation', libelle: 'Présentation' },
+  { id: 'prerequis', libelle: 'Prérequis' },
+  { id: 'deroulement', libelle: 'Déroulement' },
+  { id: 'programme', libelle: 'Programme' },
+  { id: 'duree', libelle: 'Durée et organisation' },
+  { id: 'documents', libelle: 'Documents' },
+  { id: 'tarifs', libelle: 'Tarifs et financement' },
+  { id: 'questions', libelle: 'Questions fréquentes' },
+  { id: 'demande', libelle: 'Demande d’informations' },
+]
+---
+
+<Base titre={f.titreSeo} description={f.descriptionSeo} noindex={brouillon} filAriane={filAriane}>
+  {
+    brouillon && (
+      <p class="brouillon">
+        <Icone nom="info" />
+        Page en brouillon : cette formation reste à confirmer par l’établissement. Elle n’est ni dans les menus, ni
+        dans le plan du site, et n’est pas indexée.
+      </p>
+    )
+  }
+
+  <HerosPage filAriane={filAriane} surTitre={rubrique ? rubrique.libelle : 'Formation théorique'}>
+    <Fragment slot="titre">{f.nom}</Fragment>
+    {f.accroche}
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href={lienDevis}>
+        Demander un devis
+        <Icone nom="fleche" />
+      </a>
+      <a class="bouton bouton--contour-clair" href={e.telephone.lien}>
+        <Icone nom="telephone" />
+        Nous appeler
+      </a>
+    </Fragment>
+    <div slot="visuel" class="formation-visuel">
+      {
+        photo ? (
+          <Picture
+            src={photo.src}
+            formats={['avif', 'webp']}
+          fallbackFormat="jpg"
+            widths={[400, 640, 900]}
+            sizes="(min-width: 64rem) 40vw, 100vw"
+            alt={photo.alt}
+            loading="eager"
+            class="formation-visuel__image"
+          />
+        ) : (
+          <Visuel motif={f.visuel} class="formation-visuel__image" />
+        )
+      }
+    </div>
+    <ul slot="bas" class="en-bref" aria-label="En bref">
+      {
+        f.enBref.map((fait) => (
+          <li>
+            <span class="en-bref__libelle">{fait.libelle}</span>
+            <span class="en-bref__valeur">{fait.valeur}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </HerosPage>
+
+  <div class="conteneur formation">
+    <aside class="formation__aside" aria-label="Sur cette page">
+      <nav class="sommaire">
+        <p class="sommaire__titre">Sur cette page</p>
+        <ol>
+          {sommaire.map((s) => <li><a href={`#${s.id}`}>{s.libelle}</a></li>)}
+        </ol>
+      </nav>
+      <div class="aside-appel surface-nuit">
+        <p class="aside-appel__titre">Un projet de {f.nomCourt.toLowerCase()} ?</p>
+        <p class="texte-doux">Nous vous répondons aux horaires du bureau, et vous rappelons si besoin.</p>
+        <a class="bouton bouton--clair bouton--petit" href={lienDevis}>Demander un devis</a>
+        <a class="aside-appel__tel" href={e.telephone.lien}>
+          <Icone nom="telephone" />
+          {e.telephone.affiche}
+        </a>
+      </div>
+    </aside>
+
+    <div class="formation__contenu">
+      <section class="bloc" aria-labelledby="presentation">
+        <h2 id="presentation" class="bloc__titre">À qui s’adresse <span class="accent">cette formation</span> ?</h2>
+        <div class="bloc__texte">{f.pourQui.map((p) => <p>{p}</p>)}</div>
+      </section>
+
+      <section class="bloc" aria-labelledby="prerequis">
+        <h2 id="prerequis" class="bloc__titre">Prérequis</h2>
+        <ul class="liste-coches">
+          {
+            f.prerequis.map((p) => (
+              <li>
+                <Icone nom="coche-cercle" />
+                <span>{p}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="bloc" aria-labelledby="deroulement">
+        <h2 id="deroulement" class="bloc__titre">Déroulement</h2>
+        <ol class="etapes">
+          {
+            f.deroule.map((etape, i) => (
+              <li class="etape" data-revele style={`--rang: ${i}`}>
+                <span class="etape__numero" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 class="etape__titre">{etape.titre}</h3>
+                  <p>{etape.texte}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="bloc" aria-labelledby="programme">
+        <h2 id="programme" class="bloc__titre">Programme</h2>
+        <p class="bloc__intro texte-doux">Les compétences travaillées pendant la formation.</p>
+        <ul class="programme">
+          {
+            f.programme.map((p, i) => (
+              <li class="programme__item" data-revele style={`--rang: ${i}`}>
+                <span class="programme__rang" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3>{p.titre}</h3>
+                <p>{p.texte}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="bloc" aria-labelledby="duree">
+        <h2 id="duree" class="bloc__titre">Durée et organisation</h2>
+        <div class="bloc__texte">{f.duree.map((p) => <p>{p}</p>)}</div>
+        <p class="bloc__remarque">
+          <Icone nom="info" />
+          <span>
+            Les durées indiquées sont des minimums réglementaires : chacun progresse à son rythme, et le nombre d’heures
+            réellement nécessaire varie d’un élève à l’autre.
+          </span>
+        </p>
+      </section>
+
+      <section class="bloc" aria-labelledby="documents">
+        <h2 id="documents" class="bloc__titre">Documents nécessaires</h2>
+        <ul class="pieces">
+          {
+            pieces.map((piece) => (
+              <li class="piece">
+                <span class="piece__case" aria-hidden="true" />
+                <span>
+                  <strong>{piece.titre}</strong>
+                  {piece.selonCas && <span class="piece__cas"> (selon votre situation)</span>}
+                  <span class="piece__detail">{piece.detail}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <a class="lien-fleche" href={`/documents-inscription?formation=${f.slug}`}>
+          Préparer mon dossier avec la liste à cocher
+          <Icone nom="fleche" />
+        </a>
+      </section>
+
+      <section class="bloc" aria-labelledby="tarifs">
+        <h2 id="tarifs" class="bloc__titre">Tarifs et <span class="accent">financement</span></h2>
+        <ul class="tarifs">
+          {
+            f.tarifs.map((t) => {
+              const prix = prixAffiche(t)
+              return (
+                <li class="tarif carte">
+                  <div>
+                    <h3 class="tarif__nom">{t.libelle}</h3>
+                    {prix !== null && t.volume && <p class="tarif__volume">{t.volume}</p>}
+                  </div>
+                  <p class="tarif__prix">
+                    {prix !== null ? (
+                      <>
+                        {euros(prix)}
+                        <span>TTC</span>
+                      </>
+                    ) : (
+                      'Tarif sur demande'
+                    )}
+                  </p>
+                </li>
+              )
+            })
+          }
+        </ul>
+        <p class="bloc__texte texte-doux">
+          Prix toutes taxes comprises (TTC). Les forfaits sont exprimés en leçons : le devis précise leur durée, détaille
+          chaque prestation et s’ajuste au nombre d’heures estimé lors de l’évaluation de départ.
+        </p>
+        <a class="bouton" href={lienDevis}>Obtenir un devis personnalisé</a>
+
+        <h3 class="bloc__sous-titre">Les solutions de financement possibles</h3>
+        <ul class="financements-compacts">
+          {
+            f.financements.map((id) => {
+              const fi = financement(id)
+              return (
+                <li>
+                  <a href={`/financement#${fi.id}`}>
+                    <strong>{fi.titre}</strong>
+                    <span>{fi.mention}</span>
+                    <Icone nom="fleche" />
+                  </a>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <Questions
+    questions={f.faq}
+    id="questions"
+    etiquette={f.nomCourt}
+    titreDebut="Questions"
+    titreAccent="fréquentes"
+    fond="gris"
+  />
+
+  <section class="section demande-formation" aria-labelledby="demande">
+    <div class="conteneur demande-formation__grille">
+      <div>
+        <EnteteSection etiquette="Demande d’informations" id="demande">
+          <Fragment slot="titre">Parlons de votre <span class="accent">projet</span></Fragment>
+          {formulaireActif
+            ? 'Laissez vos coordonnées : nous vous recontactons pour répondre à vos questions et établir votre devis.'
+            : 'Une question, un devis ? Appelez-nous ou écrivez-nous : nous vous répondons aux horaires du bureau.'}
+        </EnteteSection>
+        <ul class="liste-coches demande-formation__points">
+          <li><Icone nom="coche-cercle" /><span>Votre demande porte déjà sur : {f.nomCourt}</span></li>
+          <li><Icone nom="coche-cercle" /><span>Devis détaillé, prix TTC</span></li>
+          <li><Icone nom="coche-cercle" /><span>Ou appelez directement le {e.telephone.affiche}</span></li>
+        </ul>
+      </div>
+      <div class="carte demande-formation__carte">
+        <FormulaireDemande id={`demande-${f.slug}`} formation={f.slug} variante="court" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris sources" aria-labelledby="titre-sources">
+    <div class="conteneur sources__grille">
+      <div>
+        <h2 id="titre-sources" class="sources__titre">Sources officielles</h2>
+        <p class="texte-doux">Règles vérifiées le {dateLongue(DERNIERE_VERIFICATION)}. Elles peuvent évoluer : en cas de doute, la source fait foi.</p>
+      </div>
+      <ul>
+        {
+          f.sources.map((cle) => (
+            <li>
+              <a href={SOURCES[cle].url} target="_blank" rel="noopener">
+                {SOURCES[cle].titre}
+                <span class="visuellement-masque"> (nouvel onglet)</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    liees.length > 0 && (
+      <section class="section liees" aria-labelledby="titre-liees">
+        <div class="conteneur">
+          <EnteteSection id="titre-liees">
+            <Fragment slot="titre">
+              Ces formations peuvent <span class="accent">aussi</span> vous intéresser
+            </Fragment>
+          </EnteteSection>
+          <div class="liees__grille">
+            {liees.map((l) => (
+              <CarteFormation titre={l.nomCourt} resume={l.resume} href={`/${l.slug}`} motif={l.visuel} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .brouillon {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    padding: var(--e-3) var(--gouttiere);
+    background: var(--or);
+    color: var(--nuit);
+    font-weight: 700;
+    font-size: var(--taille-petit);
+  }
+
+  .brouillon :global(svg) {
+    flex: none;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .formation-visuel {
+    overflow: hidden;
+    border-radius: var(--rayon-l);
+    clip-path: polygon(7% 0, 100% 0, 100% 100%, 0 100%);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8);
+  }
+
+  .formation-visuel :global(.formation-visuel__image) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .en-bref {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    margin-block-start: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    list-style: none;
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon);
+    background: var(--filet-nuit);
+    overflow: hidden;
+  }
+
+  .en-bref li {
+    display: grid;
+    gap: 0.15rem;
+    padding: var(--e-4) var(--e-5);
+    background: var(--nuit-2);
+  }
+
+  .en-bref__libelle {
+    font-size: var(--taille-petit);
+    color: var(--sur-nuit-doux);
+  }
+
+  .en-bref__valeur {
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  /* ------------------------------------------------ Corps de page */
+
+  .formation {
+    display: grid;
+    gap: var(--e-7);
+    padding-block: var(--section);
+  }
+
+  .formation__aside {
+    display: none;
+  }
+
+  .bloc + .bloc {
+    margin-block-start: clamp(3rem, 2.5rem + 2vw, 4.5rem);
+  }
+
+  .bloc__titre {
+    margin-block-end: var(--e-5);
+    font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.7rem);
+  }
+
+  .bloc__intro {
+    margin-block: calc(-1 * var(--e-3)) var(--e-5);
+  }
+
+  .bloc__texte {
+    max-width: var(--largeur-texte);
+  }
+
+  .bloc__sous-titre {
+    margin-block: var(--e-7) var(--e-4);
+    font-size: 1.5rem;
+  }
+
+  .bloc__remarque {
+    display: flex;
+    gap: var(--e-3);
+    max-width: var(--largeur-texte);
+    margin-block-start: var(--e-5);
+    padding: var(--e-4);
+    border-radius: var(--rayon);
+    background: var(--ciel-voile);
+    font-size: var(--taille-petit);
+  }
+
+  .bloc__remarque :global(svg) {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--petrole-fonce);
+  }
+
+  .etapes {
+    position: relative;
+    display: grid;
+    gap: var(--e-5);
+    list-style: none;
+  }
+
+  .etapes::before {
+    content: '';
+    position: absolute;
+    inset-block: 1.5rem;
+    inset-inline-start: 1.35rem;
+    width: 3px;
+    background-image: repeating-linear-gradient(180deg, var(--petrole) 0 14px, transparent 14px 24px);
+  }
+
+  .etape {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: var(--e-4);
+  }
+
+  .etape__numero {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 4px solid var(--petrole-fonce);
+    border-radius: 50%;
+    background: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .etape__titre {
+    margin-block: 0.45rem var(--e-2);
+    font-size: 1.35rem;
+  }
+
+  .etape p {
+    color: var(--texte-doux);
+  }
+
+  .programme {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .programme__item {
+    position: relative;
+    padding: var(--e-5);
+    border: 1px solid var(--filet);
+    border-block-start: 4px solid var(--petrole);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+  }
+
+  .programme__rang {
+    display: block;
+    margin-block-end: var(--e-2);
+    font-family: var(--police-titre-italique);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--petrole-fonce);
+  }
+
+  .programme__item h3 {
+    margin-block-end: var(--e-2);
+    font-size: 1.3rem;
+  }
+
+  .programme__item p {
+    color: var(--texte-doux);
+    font-size: 0.96rem;
+  }
+
+  .pieces {
+    display: grid;
+    gap: var(--e-3);
+    margin-block-end: var(--e-5);
+    list-style: none;
+  }
+
+  .piece {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: var(--e-3);
+    padding: var(--e-4);
+    border: 1px dashed var(--bord-champ);
+    border-radius: var(--rayon);
+  }
+
+  .piece__case {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-block-start: 0.1rem;
+    border: 2px solid var(--petrole-fonce);
+    border-radius: 50%;
+  }
+
+  .piece__cas {
+    color: var(--texte-doux);
+    font-size: var(--taille-petit);
+  }
+
+  .piece__detail {
+    display: block;
+    margin-block-start: var(--e-1);
+    color: var(--texte-doux);
+    font-size: 0.93rem;
+  }
+
+  .tarifs {
+    display: grid;
+    gap: var(--e-3);
+    margin-block-end: var(--e-4);
+    list-style: none;
+  }
+
+  .tarif {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-3) var(--e-5);
+    padding: var(--e-5);
+    box-shadow: none;
+  }
+
+  .tarif__nom {
+    font-size: 1.35rem;
+  }
+
+  .tarif__volume {
+    color: var(--texte-doux);
+    font-size: var(--taille-petit);
+  }
+
+  .tarif__prix {
+    font-family: var(--police-titre);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--petrole-fonce);
+    text-transform: uppercase;
+  }
+
+  .tarif__prix span {
+    margin-inline-start: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--texte-doux);
+  }
+
+  .tarifs + .bloc__texte {
+    margin-block-end: var(--e-5);
+  }
+
+  .financements-compacts {
+    display: grid;
+    gap: var(--e-3);
+    list-style: none;
+  }
+
+  .financements-compacts a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0 var(--e-4);
+    padding: var(--e-4) var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--gris);
+    color: var(--encre);
+    text-decoration: none;
+    transition: background-color var(--duree) var(--courbe);
+  }
+
+  .financements-compacts a:hover {
+    background: var(--ciel);
+  }
+
+  .financements-compacts strong {
+    grid-column: 1;
+  }
+
+  .financements-compacts span {
+    grid-column: 1;
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+  }
+
+  .financements-compacts :global(svg) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--petrole-fonce);
+  }
+
+  /* ------------------------------------------------ Colonne « Sur cette page » */
+
+  .sommaire {
+    padding: var(--e-5);
+    border: 1px solid var(--filet);
+    border-radius: var(--rayon);
+  }
+
+  .sommaire__titre {
+    margin-block-end: var(--e-3);
+    font-family: var(--police-titre);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sommaire ol {
+    display: grid;
+    gap: var(--e-1);
+    list-style: none;
+  }
+
+  .sommaire a {
+    display: block;
+    padding: 0.3rem 0 0.3rem var(--e-3);
+    border-inline-start: 2px solid var(--filet);
+    color: var(--texte-doux);
+    font-size: 0.93rem;
+    text-decoration: none;
+  }
+
+  .sommaire a:hover {
+    border-inline-start-color: var(--petrole-fonce);
+    color: var(--encre);
+  }
+
+  .aside-appel {
+    display: grid;
+    gap: var(--e-3);
+    justify-items: start;
+    margin-block-start: var(--e-4);
+    padding: var(--e-5);
+    border-radius: var(--rayon);
+  }
+
+  .aside-appel__titre {
+    font-family: var(--police-titre);
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .aside-appel .texte-doux {
+    font-size: var(--taille-petit);
+  }
+
+  .aside-appel__tel {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-2);
+    color: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .aside-appel__tel :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--petrole-clair);
+  }
+
+  /* ------------------------------------------------ Demande, sources, liées */
+
+  .demande-formation__grille {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+
+  .demande-formation__points {
+    font-weight: 600;
+  }
+
+  .demande-formation__carte {
+    padding: clamp(1.25rem, 1rem + 2vw, 2.5rem);
+  }
+
+  .sources {
+    padding-block: var(--e-7);
+  }
+
+  .sources__grille {
+    display: grid;
+    gap: var(--e-4);
+  }
+
+  .sources__titre {
+    font-size: 1.5rem;
+    margin-block-end: var(--e-2);
+  }
+
+  .sources ul {
+    display: grid;
+    gap: var(--e-2);
+    padding-inline-start: 1.2rem;
+    font-size: var(--taille-petit);
+  }
+
+  .liees__grille {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  @media (min-width: 40rem) {
+    .programme {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .liees__grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .formation {
+      grid-template-columns: 16rem 1fr;
+      gap: var(--e-8);
+    }
+
+    .formation__aside {
+      display: block;
+      position: sticky;
+      inset-block-start: calc(var(--entete) + 1.5rem);
+      align-self: start;
+    }
+
+    .demande-formation__grille {
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: var(--e-8);
+    }
+
+    .sources__grille {
+      grid-template-columns: 1fr 1.5fr;
+      gap: var(--e-7);
+    }
+
+    .liees__grille {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

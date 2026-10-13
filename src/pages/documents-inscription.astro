@@ -1,0 +1,454 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import { PIECES } from '../data/documents.ts'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { FORMATIONS_PUBLIEES } from '../data/formations.ts'
+import { SOURCES } from '../data/sources.ts'
+
+/**
+ * La liste à cocher du dossier d’inscription (DocumentChecklist).
+ *
+ * Sans JavaScript : toutes les pièces, chacune avec les formations qu’elle
+ * concerne. Avec JavaScript : choix de la formation (ou `?formation=` dans
+ * l’adresse), cases retenues dans ce navigateur, compteur, impression ou
+ * enregistrement en PDF par la boîte d’impression du navigateur.
+ */
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Documents d’inscription', href: '/documents-inscription' },
+]
+const nomDe = (slug: string) => FORMATIONS_PUBLIEES.find((f) => f.slug === slug)?.nomCourt
+const concerne = (pour: 'toutes' | readonly string[]) =>
+  pour === 'toutes' ? 'Toutes les formations' : pour.map(nomDe).filter(Boolean).join(', ')
+
+const etapes = [
+  { titre: 'Rassemblez les pièces', texte: 'Cochez-les au fur et à mesure dans la liste ci-dessus.' },
+  { titre: 'Passez au bureau', texte: `Aux horaires du bureau, ${ETABLISSEMENT.adresse.rue}, avec vos documents.` },
+  {
+    titre: 'Nous déposons votre demande',
+    texte: 'Nous enregistrons votre demande de permis auprès de l’ANTS, qui vous attribue un numéro NEPH.',
+  },
+  { titre: 'Vous commencez', texte: 'Évaluation de départ, code, puis premières leçons selon votre formation.' },
+]
+---
+
+<Base
+  titre="Documents pour s’inscrire au permis"
+  description="La liste des documents à fournir pour vous inscrire au permis à Votre Auto-École : liste à cocher selon votre formation, à imprimer ou enregistrer."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Inscription">
+    <Fragment slot="titre">Préparez votre <span class="accent">inscription</span></Fragment>
+    La liste des pièces à fournir, selon la formation choisie. Cochez ce que vous avez déjà : votre liste reste
+    enregistrée dans ce navigateur.
+  </HerosPage>
+
+  <section class="section" aria-labelledby="titre-liste">
+    <div class="conteneur liste-documents" data-documents>
+      <div class="liste-documents__outils ne-pas-imprimer">
+        <h2 id="titre-liste" class="liste-documents__titre">Ma liste de documents</h2>
+        <div class="outils" data-outils hidden>
+          <label for="choix-formation">Ma formation</label>
+          <select id="choix-formation" data-choix-formation>
+            <option value="">Toutes les formations</option>
+            {FORMATIONS_PUBLIEES.map((f) => <option value={f.slug}>{f.nom}</option>)}
+          </select>
+          <p class="outils__progression" aria-live="polite" data-progression></p>
+          <div class="outils__boutons">
+            <button class="bouton bouton--petit" type="button" data-imprimer>
+              <Icone nom="imprimante" />
+              Imprimer ou enregistrer en PDF
+            </button>
+            <button class="bouton bouton--petit bouton--contour" type="button" data-effacer>Tout décocher</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="liste-documents__contenu">
+        <p class="impression-seule">
+          {ETABLISSEMENT.nom} · {ETABLISSEMENT.adresse.rue}, {ETABLISSEMENT.adresse.codePostal}
+          {ETABLISSEMENT.adresse.ville} · {ETABLISSEMENT.telephone.affiche}
+        </p>
+        <p class="impression-seule" data-titre-impression>Documents à fournir</p>
+        <ul class="documents">
+          {
+            PIECES.map((piece) => (
+              <li class="document" data-pour={piece.pour === 'toutes' ? 'toutes' : piece.pour.join(' ')}>
+                <input type="checkbox" id={`piece-${piece.id}`} data-piece={piece.id} />
+                <label for={`piece-${piece.id}`}>
+                  <span class="document__case" aria-hidden="true">
+                    <Icone nom="coche" />
+                  </span>
+                  <span class="document__texte">
+                    <strong>{piece.titre}</strong>
+                    {piece.selonCas && <span class="document__cas">Selon votre situation</span>}
+                    <span class="document__detail">{piece.detail}</span>
+                    <span class="document__concerne">Concerne : {concerne(piece.pour)}</span>
+                  </span>
+                </label>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="liste-documents__note texte-doux">
+          La liste définitive est confirmée à l’inscription, selon votre formation et votre situation. Référence
+          officielle :{' '}
+          <a href={SOURCES.ants.url} target="_blank" rel="noopener">
+            {SOURCES.ants.titre}<span class="visuellement-masque"> (nouvel onglet)</span>
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris ne-pas-imprimer" aria-labelledby="titre-etapes">
+    <div class="conteneur">
+      <EnteteSection etiquette="Et ensuite ?" id="titre-etapes">
+        <Fragment slot="titre">Votre inscription <span class="accent">en 4 temps</span></Fragment>
+      </EnteteSection>
+      <ol class="temps">
+        {
+          etapes.map((etape, i) => (
+            <li>
+              <span class="temps__numero" aria-hidden="true">
+                {i + 1}
+              </span>
+              <h3>{etape.titre}</h3>
+              <p>{etape.texte}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <div class="ne-pas-imprimer">
+    <AppelFinal
+      titre="Une question sur"
+      accent="votre dossier ?"
+      texte="Appelez-nous ou passez au bureau : nous vérifions avec vous les pièces demandées pour votre situation."
+    />
+  </div>
+</Base>
+
+<script>
+  const CLE = 'auto-ecole-documents'
+  const bloc = document.querySelector<HTMLElement>('[data-documents]')
+  if (bloc) {
+    const outils = bloc.querySelector<HTMLElement>('[data-outils]')
+    const choix = bloc.querySelector<HTMLSelectElement>('[data-choix-formation]')
+    const progression = bloc.querySelector<HTMLElement>('[data-progression]')
+    const titreImpression = bloc.querySelector<HTMLElement>('[data-titre-impression]')
+    const cases = [...bloc.querySelectorAll<HTMLInputElement>('[data-piece]')]
+
+    const lire = (): { formation?: string; cochees?: string[] } => {
+      try {
+        return JSON.parse(localStorage.getItem(CLE) ?? '{}')
+      } catch {
+        return {}
+      }
+    }
+    const ecrire = () => {
+      try {
+        localStorage.setItem(
+          CLE,
+          JSON.stringify({ formation: choix?.value ?? '', cochees: cases.filter((c) => c.checked).map((c) => c.dataset.piece) }),
+        )
+      } catch {
+        /* Stockage indisponible : la liste fonctionne pour cette visite. */
+      }
+    }
+
+    function filtrer() {
+      const formation = choix?.value ?? ''
+      let visibles = 0
+      let cochees = 0
+      for (const c of cases) {
+        const li = c.closest<HTMLElement>('li')!
+        const pour = li.dataset.pour ?? 'toutes'
+        const visible = !formation || pour === 'toutes' || pour.split(' ').includes(formation)
+        li.hidden = !visible
+        if (visible) {
+          visibles++
+          if (c.checked) cochees++
+        }
+      }
+      if (progression) progression.textContent = `${cochees} pièce${cochees > 1 ? 's' : ''} prête${cochees > 1 ? 's' : ''} sur ${visibles}`
+      if (titreImpression) {
+        const nom = choix?.selectedOptions[0]?.textContent ?? ''
+        titreImpression.textContent = formation ? `Documents à fournir : ${nom}` : 'Documents à fournir'
+      }
+    }
+
+    const sauvegarde = lire()
+    const parametre = new URLSearchParams(location.search).get('formation')
+    const initiale = parametre ?? sauvegarde.formation ?? ''
+    if (choix && [...choix.options].some((o) => o.value === initiale)) choix.value = initiale
+    for (const c of cases) c.checked = sauvegarde.cochees?.includes(c.dataset.piece ?? '') ?? false
+
+    if (outils) outils.hidden = false
+    filtrer()
+
+    choix?.addEventListener('change', () => {
+      filtrer()
+      ecrire()
+    })
+    for (const c of cases)
+      c.addEventListener('change', () => {
+        filtrer()
+        ecrire()
+      })
+    bloc.querySelector('[data-imprimer]')?.addEventListener('click', () => window.print())
+    bloc.querySelector('[data-effacer]')?.addEventListener('click', () => {
+      for (const c of cases) c.checked = false
+      filtrer()
+      ecrire()
+    })
+  }
+</script>
+
+<style>
+  .liste-documents {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+
+  .liste-documents__titre {
+    margin-block-end: var(--e-5);
+    font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem);
+  }
+
+  .outils {
+    display: grid;
+    gap: var(--e-3);
+    padding: var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--ciel-voile);
+  }
+
+  .outils[hidden] {
+    display: none;
+  }
+
+  .outils label {
+    font-weight: 700;
+  }
+
+  .outils select {
+    width: 100%;
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--bord-champ);
+    border-radius: var(--rayon-s);
+    background: var(--blanc);
+  }
+
+  .outils__progression {
+    font-family: var(--police-titre);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--petrole-tres-fonce);
+  }
+
+  .outils__boutons {
+    display: grid;
+    gap: var(--e-3);
+    justify-items: start;
+  }
+
+  .documents {
+    display: grid;
+    gap: var(--e-3);
+    list-style: none;
+  }
+
+  .document[hidden] {
+    display: none;
+  }
+
+  .document input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .document label {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: var(--e-4);
+    padding: var(--e-4) var(--e-5);
+    border: 1.5px dashed var(--bord-champ);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+    cursor: pointer;
+    transition:
+      background-color var(--duree) var(--courbe),
+      border-color var(--duree) var(--courbe);
+  }
+
+  .document label:hover {
+    border-color: var(--petrole-fonce);
+  }
+
+  .document input:focus-visible + label {
+    outline: 3px solid var(--petrole-fonce);
+    outline-offset: 3px;
+  }
+
+  .document__case {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2.5px solid var(--petrole-fonce);
+    border-radius: 50%;
+    color: transparent;
+    transition: background-color var(--duree) var(--courbe);
+  }
+
+  .document__case :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    stroke-width: 3;
+  }
+
+  .document input:checked + label {
+    border-style: solid;
+    border-color: var(--petrole-fonce);
+    background: var(--ciel-voile);
+  }
+
+  .document input:checked + label .document__case {
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+  }
+
+  .document__texte {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .document__cas {
+    justify-self: start;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--gris);
+    color: var(--texte-doux);
+    font-size: var(--taille-mini);
+    font-weight: 700;
+  }
+
+  .document__detail {
+    color: var(--texte-doux);
+    font-size: 0.95rem;
+  }
+
+  .document__concerne {
+    font-size: var(--taille-mini);
+    color: var(--texte-doux);
+  }
+
+  .liste-documents__note {
+    overflow-wrap: anywhere;
+    margin-block-start: var(--e-5);
+    font-size: var(--taille-petit);
+  }
+
+  .impression-seule {
+    display: none;
+  }
+
+  .temps {
+    display: grid;
+    gap: var(--e-5);
+    list-style: none;
+  }
+
+  .temps li {
+    padding: var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+  }
+
+  .temps__numero {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-block-end: var(--e-3);
+    border: 5px solid var(--petrole-fonce);
+    border-radius: 50%;
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .temps h3 {
+    margin-block-end: var(--e-2);
+    font-size: 1.35rem;
+  }
+
+  .temps p {
+    color: var(--texte-doux);
+  }
+
+  @media (min-width: 40rem) {
+    .temps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .liste-documents {
+      grid-template-columns: 20rem 1fr;
+      gap: var(--e-8);
+    }
+
+    .liste-documents__outils {
+      position: sticky;
+      inset-block-start: calc(var(--entete) + 1.5rem);
+    }
+
+    .temps {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media print {
+    :global(.heros-page) {
+      display: none !important;
+    }
+
+    .section {
+      padding: 0;
+    }
+
+    .liste-documents {
+      display: block;
+    }
+
+    .impression-seule {
+      display: block;
+      margin-block-end: 0.5rem;
+      font-weight: 700;
+    }
+
+    [data-titre-impression] {
+      font-size: 1.4rem;
+      margin-block-end: 1rem;
+    }
+
+    .document label {
+      break-inside: avoid;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>

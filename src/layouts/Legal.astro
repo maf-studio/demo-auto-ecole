@@ -1,0 +1,71 @@
+---
+import Base from './Base.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+
+/** Les pages légales : en `noindex`, hors du sitemap, texte courant. */
+interface Props {
+  titre: string
+  description: string
+  chemin: string
+}
+const { titre, description, chemin } = Astro.props
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: titre, href: chemin },
+]
+---
+
+<Base titre={titre} description={description} noindex filAriane={filAriane}>
+  <HerosPage filAriane={filAriane}>
+    <Fragment slot="titre">{titre}</Fragment>
+  </HerosPage>
+  <div class="section section--serree">
+    <div class="conteneur prose legal">
+      <slot />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .legal :global(h2:first-child) {
+    margin-block-start: 0;
+  }
+
+  .legal :global(dl) {
+    display: grid;
+    gap: var(--e-2);
+    margin: var(--e-4) 0;
+  }
+
+  .legal :global(dl > div) {
+    display: grid;
+    gap: 0 var(--e-4);
+    padding-block: var(--e-2);
+    border-block-end: 1px dashed var(--filet);
+  }
+
+  .legal :global(dt) {
+    font-weight: 700;
+  }
+
+  .legal :global(dd) {
+    margin: 0;
+  }
+
+  .legal :global(.a-completer) {
+    display: inline-block;
+    padding: 0.05rem 0.5rem;
+    border: 1px dashed var(--erreur);
+    border-radius: var(--rayon-s);
+    background: var(--erreur-voile);
+    color: var(--erreur);
+    font-size: var(--taille-petit);
+    font-weight: 700;
+  }
+
+  @media (min-width: 40rem) {
+    .legal :global(dl > div) {
+      grid-template-columns: 14rem 1fr;
+    }
+  }
+</style>

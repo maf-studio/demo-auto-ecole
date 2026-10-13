@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro'
+import PageMessage from '../components/sections/PageMessage.astro'
+---
+
+<Base titre="Page introuvable" description="Cette page n’existe pas ou a été déplacée. Retrouvez les formations de Votre Auto-École." noindex>
+  <PageMessage icone="panneau">
+    <Fragment slot="titre">Mauvaise <span class="accent">direction</span></Fragment>
+    <p>Cette page n’existe pas, ou elle a changé d’adresse.</p>
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/">Retour à l’accueil</a>
+      <a class="bouton bouton--contour-clair" href="/plan-du-site">Plan du site</a>
+    </Fragment>
+  </PageMessage>
+</Base>

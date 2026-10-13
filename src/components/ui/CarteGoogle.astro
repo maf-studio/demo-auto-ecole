@@ -1,0 +1,146 @@
+---
+import Icone from './Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+/**
+ * La carte Google Maps, chargée seulement après l’accord du visiteur.
+ *
+ * Google dépose des cookies et reçoit l’adresse IP dès que la carte s’affiche :
+ * la carte reste donc une image neutre jusqu’au clic. L’accord est retenu dans
+ * le navigateur (localStorage, clé `auto-ecole-carte`) et se retire depuis la
+ * page /cookies. Sans JavaScript, le lien « Ouvrir dans Google Maps » reste.
+ */
+interface Props {
+  class?: string
+}
+const { class: classe } = Astro.props
+const e = ETABLISSEMENT
+---
+
+<div
+  class:list={['carte-google', classe]}
+  data-carte={e.google.carte}
+  data-titre={`Carte : ${e.nom}, ${e.adresse.rue}, ${e.adresse.ville}`}
+>
+  <div class="carte-google__voile" data-carte-voile>
+    <Icone nom="carte_plan" class="carte-google__icone" />
+    <p class="carte-google__adresse">
+      <strong>{e.adresse.rue}</strong>
+      <span>{e.adresse.codePostal} {e.adresse.ville}</span>
+    </p>
+    <p class="carte-google__texte">
+      Afficher la carte charge un service de Google, qui peut déposer des cookies.
+    </p>
+    <div class="carte-google__actions">
+      <button class="bouton bouton--petit" type="button" data-carte-accord hidden>Afficher la carte</button>
+      <a class="lien-fleche" href={e.google.itineraire} target="_blank" rel="noopener">
+        Ouvrir dans Google Maps <Icone nom="externe" />
+        <span class="visuellement-masque">(nouvel onglet)</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CLE = 'auto-ecole-carte'
+  const lire = () => {
+    try {
+      return localStorage.getItem(CLE) === 'oui'
+    } catch {
+      return false
+    }
+  }
+
+  function afficher(bloc: HTMLElement) {
+    const adresse = bloc.dataset.carte
+    if (!adresse || bloc.querySelector('iframe')) return
+    const cadre = document.createElement('iframe')
+    cadre.src = adresse
+    cadre.title = bloc.dataset.titre ?? 'Carte'
+    cadre.loading = 'lazy'
+    cadre.referrerPolicy = 'no-referrer-when-downgrade'
+    cadre.className = 'carte-google__cadre'
+    bloc.append(cadre)
+    bloc.querySelector('[data-carte-voile]')?.setAttribute('hidden', '')
+  }
+
+  for (const bloc of document.querySelectorAll<HTMLElement>('[data-carte]')) {
+    const bouton = bloc.querySelector<HTMLButtonElement>('[data-carte-accord]')
+    if (!bouton) continue
+    bouton.hidden = false
+    bouton.addEventListener('click', () => {
+      try {
+        localStorage.setItem(CLE, 'oui')
+      } catch {
+        /* Navigation privée : la carte s’affiche pour cette visite seulement. */
+      }
+      afficher(bloc)
+    })
+    if (lire()) afficher(bloc)
+  }
+</script>
+
+<style>
+  .carte-google {
+    position: relative;
+    min-height: 22rem;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--rayon);
+    background-color: var(--ciel-voile);
+    background-image:
+      linear-gradient(var(--filet) 1px, transparent 1px),
+      linear-gradient(90deg, var(--filet) 1px, transparent 1px);
+    background-size: 2.5rem 2.5rem;
+    border: 1px solid var(--filet);
+  }
+
+  .carte-google__voile {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--e-3);
+    padding: var(--e-6) var(--e-5);
+    text-align: center;
+  }
+
+  .carte-google__voile[hidden] {
+    display: none;
+  }
+
+  :global(.carte-google__icone) {
+    width: 2.6rem;
+    height: 2.6rem;
+    color: var(--petrole-fonce);
+  }
+
+  .carte-google__adresse {
+    display: grid;
+    font-size: 1.05rem;
+  }
+
+  .carte-google__texte {
+    max-width: 24rem;
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+  }
+
+  .carte-google__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--e-4) var(--e-5);
+    margin-block-start: var(--e-2);
+  }
+
+  :global(.carte-google__cadre) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

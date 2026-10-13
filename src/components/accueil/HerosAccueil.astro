@@ -1,0 +1,350 @@
+---
+import Etoiles from '../ui/Etoiles.astro'
+import Icone from '../ui/Icone.astro'
+import Scene from '../ui/Scene.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { dateRelevee, noteFr } from '../../lib/format.ts'
+
+const e = ETABLISSEMENT
+const note = e.noteGoogle
+---
+
+<section class="heros surface-nuit" aria-labelledby="titre-heros">
+  <div class="heros__decor" aria-hidden="true">
+    <span class="heros__bande heros__bande--1"></span>
+    <span class="heros__bande heros__bande--2"></span>
+  </div>
+
+  <div class="conteneur heros__grille">
+    <div class="heros__texte">
+      {/* Le titre porte la recherche locale (« auto-moto école à … »), puis le slogan. */}
+      <h1 id="titre-heros" class="heros__h1">
+        <span class="heros__badge">
+          <span class="heros__badge-texte">Auto-moto école à {e.adresse.ville}</span>{' '}
+          <span class="signature heros__badge-signature">depuis {e.anneeCreation}</span>
+        </span>{' '}
+        <span class="heros__titre">
+          Votre permis,<br />
+          <span class="accent">en confiance.</span>
+        </span>
+      </h1>
+      <p class="chapo heros__chapo">
+        Code de la route, permis auto et permis moto : des formations adaptées à votre rythme, de l’inscription
+        jusqu’au jour de l’examen.
+      </p>
+      <div class="boutons">
+        <a class="bouton" href="#formations">
+          Découvrir nos formations
+          <Icone nom="fleche" />
+        </a>
+        <a class="bouton bouton--contour-clair" href="/contact#demande">Demander un devis</a>
+      </div>
+      <a class="heros__tel" href={e.telephone.lien}>
+        <Icone nom="telephone" />
+        <span>Une question ? Appelez-nous au <strong>{e.telephone.affiche}</strong></span>
+      </a>
+
+      {
+        note && (
+          <a class="heros__note" href={e.google.fiche} target="_blank" rel="noopener">
+            <span class="heros__note-chiffre">{noteFr(note.note)}</span>
+            <span class="heros__note-detail">
+              <Etoiles note={note.note} />
+              <span>
+                {note.nombreAvis} avis Google<span class="heros__note-date"> · relevé {dateRelevee(note.releveLe)}</span>
+              </span>
+            </span>
+            <span class="visuellement-masque">
+              : note de {noteFr(note.note)} sur 5. Voir les avis sur Google (nouvel onglet)
+            </span>
+          </a>
+        )
+      }
+    </div>
+
+    <div class="heros__visuel">
+      <div class="heros__cadre">
+        <Scene class="heros__image" />
+      </div>
+      <ul class="heros__fiches">
+        <li>
+          <Icone nom="adresse" />
+          <span><strong>{e.adresse.rue}</strong> {e.adresse.ville}</span>
+        </li>
+        <li>
+          <Icone nom="volant" />
+          <span><strong>Conduite</strong> du lundi au samedi, 7 h – 20 h</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="heros__route ligne-route" aria-hidden="true"></div>
+</section>
+
+<style>
+  .heros {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(5.5rem, 4rem + 4vw, 8rem);
+    background:
+      radial-gradient(70% 80% at 85% 20%, rgb(57 139 164 / 0.32), transparent 65%),
+      radial-gradient(50% 60% at 0% 100%, rgb(57 139 164 / 0.14), transparent 70%),
+      var(--nuit);
+  }
+
+  .heros__decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .heros__bande {
+    position: absolute;
+    inset-block: -10%;
+    background: var(--petrole);
+    transform: skewX(var(--biais));
+  }
+
+  .heros__bande--1 {
+    inset-inline-end: 6%;
+    width: 9rem;
+    opacity: 0.12;
+  }
+
+  .heros__bande--2 {
+    inset-inline-end: calc(6% + 11rem);
+    width: 2.2rem;
+    opacity: 0.18;
+  }
+
+  .heros__grille {
+    position: relative;
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    align-items: center;
+  }
+
+  .heros__h1 {
+    margin: 0;
+  }
+
+  .heros__badge {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.7rem;
+    margin-block-end: var(--e-5);
+    padding: 0.35rem 0.9rem 0.3rem;
+    border: 1px solid rgb(124 198 220 / 0.4);
+    border-radius: 999px;
+    background: rgb(124 198 220 / 0.08);
+  }
+
+  .heros__badge-texte {
+    font-family: var(--police-titre);
+    line-height: 1.3;
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .heros__badge-signature {
+    font-size: 1.15rem;
+    color: var(--petrole-clair);
+  }
+
+  .heros__titre {
+    display: block;
+    font-size: var(--taille-heros);
+    line-height: 0.9;
+    letter-spacing: 0;
+  }
+
+  /* Le titre est le premier affichage : seul `transform` s’y anime, en CSS. */
+  @media (prefers-reduced-motion: no-preference) {
+    .heros__titre {
+      animation: monte 700ms var(--courbe) both;
+    }
+
+    @keyframes monte {
+      from {
+        transform: translateY(14px);
+      }
+    }
+  }
+
+  .heros__chapo {
+    margin-block: var(--e-5) var(--e-6);
+    text-wrap: balance;
+  }
+
+  .heros__tel {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-3);
+    margin-block-start: var(--e-5);
+    color: var(--sur-nuit-doux);
+    text-decoration: none;
+  }
+
+  .heros__tel strong {
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  .heros__tel :global(svg) {
+    flex: none;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0.6rem;
+    border-radius: 50%;
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+  }
+
+  .heros__tel:hover strong {
+    color: var(--petrole-clair);
+  }
+
+  .heros__note {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: var(--e-3);
+    margin-block-start: var(--e-6);
+    padding: 0.55rem 1rem 0.55rem 0.75rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon);
+    background: rgb(255 255 255 / 0.04);
+    color: var(--sur-nuit);
+    text-decoration: none;
+    transition: background-color var(--duree) var(--courbe);
+  }
+
+  .heros__note:hover {
+    background: rgb(255 255 255 / 0.08);
+    color: var(--sur-nuit);
+  }
+
+  .heros__note-chiffre {
+    font-family: var(--police-titre);
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .heros__note-detail {
+    display: grid;
+    gap: 0.15rem;
+    font-size: var(--taille-petit);
+    line-height: 1.3;
+  }
+
+  .heros__note-date {
+    color: var(--sur-nuit-doux);
+  }
+
+  .heros__visuel {
+    position: relative;
+  }
+
+  .heros__cadre {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--rayon-l);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8);
+    clip-path: polygon(6% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .heros__cadre::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgb(7 29 43 / 0.55));
+    pointer-events: none;
+  }
+
+  .heros__cadre :global(.heros__image) {
+    width: 100%;
+    aspect-ratio: 945 / 423;
+    object-fit: cover;
+  }
+
+  .heros__fiches {
+    display: grid;
+    gap: var(--e-2);
+    margin-block-start: var(--e-4);
+    list-style: none;
+    font-size: var(--taille-petit);
+  }
+
+  .heros__fiches li {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    color: var(--sur-nuit-doux);
+  }
+
+  .heros__fiches strong {
+    color: var(--sur-nuit);
+  }
+
+  .heros__fiches :global(svg) {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--petrole-clair);
+  }
+
+  .heros__route {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 2.25rem;
+    color: rgb(255 255 255 / 0.18);
+  }
+
+  @media (min-width: 40rem) {
+    .heros__fiches {
+      position: absolute;
+      inset-inline-start: -1.5rem;
+      inset-block-end: -1.75rem;
+      margin: 0;
+      padding: var(--e-4) var(--e-5);
+      background: var(--blanc);
+      border-radius: var(--rayon);
+      box-shadow: var(--ombre-forte);
+    }
+
+    .heros__fiches li,
+    .heros__fiches strong {
+      color: var(--encre);
+    }
+
+    .heros__fiches :global(svg) {
+      color: var(--petrole-fonce);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .heros__grille {
+      grid-template-columns: 1fr 1.08fr;
+    }
+
+    .heros__cadre {
+      margin-inline-end: calc(-1 * var(--gouttiere));
+      border-start-end-radius: 0;
+      border-end-end-radius: 0;
+    }
+  }
+
+  @media (min-width: 90rem) {
+    .heros__cadre {
+      margin-inline-end: 0;
+      border-radius: var(--rayon-l);
+    }
+  }
+</style>

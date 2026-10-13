@@ -1,0 +1,53 @@
+---
+import Icone from './Icone.astro'
+
+/** Cinq étoiles, remplies selon la note (4,8 → quatre pleines et une aux 4/5). */
+interface Props {
+  note: number
+  class?: string
+}
+const { note, class: classe } = Astro.props
+const remplissages = [0, 1, 2, 3, 4].map((i) => Math.max(0, Math.min(1, note - i)))
+---
+
+<span class:list={['etoiles', classe]} aria-hidden="true">
+  {
+    remplissages.map((r) => (
+      <span class="etoile" style={`--remplissage: ${r * 100}%`}>
+        <Icone nom="etoile" plein class="etoile__fond" />
+        <Icone nom="etoile" plein class="etoile__plein" />
+      </span>
+    ))
+  }
+</span>
+
+<style>
+  .etoiles {
+    display: inline-flex;
+    gap: 0.12em;
+    vertical-align: middle;
+  }
+
+  .etoile {
+    position: relative;
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .etoile :global(svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke-width: 0;
+  }
+
+  .etoile :global(.etoile__fond) {
+    color: var(--filet);
+  }
+
+  .etoile :global(.etoile__plein) {
+    color: var(--or);
+    clip-path: inset(0 calc(100% - var(--remplissage)) 0 0);
+  }
+</style>

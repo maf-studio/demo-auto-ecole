@@ -1,0 +1,93 @@
+---
+/**
+ * Un tableau comparatif (formations d’une rubrique). Sur téléphone, il défile
+ * horizontalement dans son cadre, avec la première colonne fixée.
+ */
+interface Props {
+  legende: string
+  colonnes: readonly string[]
+  lignes: ReadonlyArray<{ intitule: string; href?: string; valeurs: readonly string[] }>
+}
+const { legende, colonnes, lignes } = Astro.props
+---
+
+<div class="comparatif" role="region" aria-label={legende} tabindex="0">
+  <table>
+    <caption class="visuellement-masque">{legende}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Formation</th>
+        {colonnes.map((c) => <th scope="col">{c}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {
+        lignes.map((l) => (
+          <tr>
+            <th scope="row">{l.href ? <a href={l.href}>{l.intitule}</a> : l.intitule}</th>
+            {l.valeurs.map((v) => (
+              <td>{v}</td>
+            ))}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .comparatif {
+    overflow-x: auto;
+    border: 1px solid var(--filet);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+  }
+
+  .comparatif:focus-visible {
+    outline: 3px solid var(--petrole-fonce);
+  }
+
+  table {
+    width: 100%;
+    min-width: 46rem;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  th,
+  td {
+    padding: var(--e-4);
+    border-block-end: 1px solid var(--filet);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  thead th {
+    background: var(--nuit);
+    color: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    background: var(--blanc);
+    font-weight: 700;
+    min-width: 11rem;
+  }
+
+  tbody tr:nth-child(even) th,
+  tbody tr:nth-child(even) td {
+    background: var(--gris);
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-block-end: 0;
+  }
+</style>

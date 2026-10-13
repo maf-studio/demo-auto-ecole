@@ -1,0 +1,139 @@
+---
+import Icone from '../ui/Icone.astro'
+import Scene from '../ui/Scene.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+interface Props {
+  titre?: string
+  accent?: string
+  texte?: string
+  /** Nom de la formation, transmis au formulaire de devis. */
+  formation?: string
+}
+
+const {
+  titre = 'Prêt à prendre',
+  accent = 'la route ?',
+  texte = 'Votre projet commence ici. Contactez notre équipe pour choisir la formation qui vous correspond.',
+  formation,
+} = Astro.props
+const lienDevis = formation ? `/contact?formation=${encodeURIComponent(formation)}#demande` : '/contact#demande'
+---
+
+<section class="appel surface-nuit" aria-labelledby="titre-appel">
+  <div class="appel__bandes" aria-hidden="true">
+    <span></span><span></span>
+  </div>
+  <div class="conteneur appel__grille">
+    <div class="appel__texte" data-revele>
+      <h2 id="titre-appel" class="appel__titre">{titre}{' '}<span class="accent">{accent}</span></h2>
+      <p class="chapo">{texte}</p>
+      <div class="boutons">
+        <a class="bouton bouton--clair" href={lienDevis}>
+          Demander un devis
+          <Icone nom="fleche" />
+        </a>
+        <a class="bouton bouton--contour-clair" href={ETABLISSEMENT.telephone.lien}>
+          <Icone nom="telephone" />
+          Nous appeler
+        </a>
+      </div>
+      <p class="appel__numero">
+        <span class="signature">ou au</span>
+        <a href={ETABLISSEMENT.telephone.lien}>{ETABLISSEMENT.telephone.affiche}</a>
+      </p>
+    </div>
+    <div class="appel__visuel" aria-hidden="true">
+      <Scene class="appel__image" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .appel {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(4rem, 3rem + 4vw, 6.5rem);
+    background:
+      linear-gradient(115deg, var(--petrole-tres-fonce) 0%, var(--nuit) 55%),
+      var(--nuit);
+  }
+
+  .appel__bandes span {
+    position: absolute;
+    inset-block: -20%;
+    background: var(--petrole);
+    transform: skewX(var(--biais));
+  }
+
+  .appel__bandes span:first-child {
+    inset-inline-start: 42%;
+    width: 7rem;
+    opacity: 0.12;
+  }
+
+  .appel__bandes span:last-child {
+    inset-inline-start: calc(42% + 8.5rem);
+    width: 1.6rem;
+    opacity: 0.2;
+  }
+
+  .appel__grille {
+    position: relative;
+    display: grid;
+    gap: var(--e-7);
+    align-items: center;
+  }
+
+  .appel__titre {
+    font-size: var(--taille-h2);
+  }
+
+  .appel__texte .chapo {
+    margin-block: var(--e-5) var(--e-6);
+  }
+
+  .appel__numero {
+    display: flex;
+    align-items: baseline;
+    gap: var(--e-3);
+    margin-block-start: var(--e-5);
+  }
+
+  .appel__numero .signature {
+    font-size: 1.3rem;
+    color: var(--petrole-clair);
+  }
+
+  .appel__numero a {
+    color: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+  }
+
+  .appel__visuel {
+    display: none;
+  }
+
+  .appel__visuel :global(.appel__image) {
+    width: 100%;
+    aspect-ratio: 945 / 423;
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon-l);
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8);
+  }
+
+  @media (min-width: 64rem) {
+    .appel__grille {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .appel__visuel {
+      display: block;
+    }
+  }
+</style>

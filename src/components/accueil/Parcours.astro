@@ -1,0 +1,139 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+
+const etapes = [
+  {
+    titre: 'Prenez contact',
+    texte: 'Échangeons sur votre projet : par téléphone, au bureau ou depuis le site.',
+  },
+  {
+    titre: 'Évaluez vos besoins',
+    texte: 'L’évaluation de départ détermine votre parcours et un volume de formation prévisionnel.',
+  },
+  {
+    titre: 'Apprenez à conduire',
+    texte: 'Code et leçons de conduite, au rythme de votre formation, du lundi au samedi.',
+  },
+  {
+    titre: 'Préparez votre examen',
+    texte: 'Consolidez les compétences nécessaires pour vous présenter dans les meilleures conditions.',
+  },
+]
+---
+
+<section class="section section--ciel parcours" aria-labelledby="titre-parcours">
+  <div class="conteneur">
+    <EnteteSection etiquette="Le parcours" id="titre-parcours" centre>
+      <Fragment slot="titre">Votre permis en <span class="accent">4 étapes</span></Fragment>
+    </EnteteSection>
+
+    <ol class="parcours__liste">
+      {
+        etapes.map((etape, i) => (
+          <li class="parcours__etape" data-revele style={`--rang: ${i}`}>
+            <span class="parcours__panneau" aria-hidden="true">
+              {i + 1}
+            </span>
+            <h3 class="parcours__titre">
+              <span class="visuellement-masque">Étape {i + 1} : </span>
+              {etape.titre}
+            </h3>
+            <p class="parcours__texte">{etape.texte}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="parcours__note texte-doux">La réussite à l’examen dépend de chacun : nous vous y préparons, sans la promettre.</p>
+  </div>
+</section>
+
+<style>
+  .parcours__liste {
+    position: relative;
+    display: grid;
+    gap: var(--e-6);
+    list-style: none;
+  }
+
+  /* La route qui relie les étapes : verticale sur téléphone, horizontale ensuite. */
+  .parcours__liste::before {
+    content: '';
+    position: absolute;
+    inset-block: 2.5rem;
+    inset-inline-start: 2.25rem;
+    width: 4px;
+    background-image: repeating-linear-gradient(180deg, var(--petrole) 0 18px, transparent 18px 30px);
+  }
+
+  .parcours__etape {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    column-gap: var(--e-5);
+    align-items: start;
+  }
+
+  .parcours__panneau {
+    grid-row: span 2;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    aspect-ratio: 1;
+    border: 7px solid var(--petrole-fonce);
+    border-radius: 50%;
+    background: var(--blanc);
+    color: var(--nuit);
+    font-family: var(--police-titre);
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: var(--ombre);
+  }
+
+  .parcours__titre {
+    margin-block: 0.6rem var(--e-2);
+    font-size: 1.6rem;
+  }
+
+  .parcours__texte {
+    color: var(--texte-doux);
+  }
+
+  .parcours__note {
+    margin-block-start: var(--e-7);
+    font-size: var(--taille-petit);
+    text-align: center;
+  }
+
+  @media (min-width: 64rem) {
+    .parcours__liste {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--e-6);
+    }
+
+    .parcours__liste::before {
+      inset-block: 2.6rem auto;
+      inset-inline: 12.5%;
+      width: auto;
+      height: 4px;
+      background-image: repeating-linear-gradient(90deg, var(--petrole) 0 18px, transparent 18px 30px);
+    }
+
+    .parcours__etape {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .parcours__panneau {
+      grid-row: auto;
+      width: 5.25rem;
+      margin-block-end: var(--e-4);
+    }
+
+    .parcours__titre {
+      margin-block-start: 0;
+    }
+  }
+</style>

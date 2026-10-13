@@ -1,0 +1,70 @@
+---
+import Legal from '../layouts/Legal.astro'
+import ACompleter from '../components/ui/ACompleter.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+
+const e = ETABLISSEMENT
+---
+
+<Legal
+  titre="Politique de confidentialité"
+  chemin="/confidentialite"
+  description="Comment Votre Auto-École traite les données envoyées par le formulaire du site : finalité, durée de conservation, destinataires et droits."
+>
+  <h2>En bref</h2>
+  <ul>
+    <li>Le site ne collecte des données que si vous envoyez une demande par le formulaire.</li>
+    <li>Ces données servent uniquement à vous répondre et à établir votre devis.</li>
+    <li>Aucune mesure d’audience, aucune publicité, aucun cookie de suivi.</li>
+    <li>La carte Google ne se charge qu’avec votre accord.</li>
+  </ul>
+
+  <h2>Responsable du traitement</h2>
+  <p>
+    <ACompleter valeur={e.legal.raisonSociale} libelle="raison sociale" />, exploitant l’{e.nom}, {e.adresse.rue},{' '}
+    {e.adresse.codePostal} {e.adresse.ville}. Contact : <a href={`mailto:${e.email}`}>{e.email}</a>.
+  </p>
+
+  <h2>Les données collectées</h2>
+  <p>Par le formulaire de demande : nom et prénom, téléphone, e-mail, formation souhaitée, solution de financement envisagée (facultatif) et message (facultatif).</p>
+  <p>
+    Aucune autre donnée n’est demandée. N’indiquez pas d’informations sensibles (santé, situation judiciaire) dans le
+    message : elles seront demandées, si nécessaire, lors de l’inscription.
+  </p>
+
+  <h2>Finalité et base légale</h2>
+  <p>
+    Répondre à votre demande, vous rappeler et établir un devis : ce traitement repose sur les mesures précontractuelles
+    prises à votre demande (article 6.1.b du RGPD). Vos données ne servent à aucune prospection commerciale et ne sont
+    jamais vendues.
+  </p>
+
+  <h2>Destinataires</h2>
+  <p>
+    Votre demande est transmise par e-mail à l’établissement, seul destinataire. Elle transite par l’hébergeur du site
+    ({e.legal.hebergeur.nom}) et par le service d’envoi d’e-mails utilisé par le site, qui agissent comme sous-traitants
+    et ne l’exploitent pas pour leur propre compte.
+  </p>
+
+  <h2>Durée de conservation</h2>
+  <p>
+    Les demandes qui n’aboutissent pas à une inscription sont conservées au plus 3 ans après le dernier contact, puis
+    supprimées. Si vous vous inscrivez, votre dossier suit les règles de conservation propres à la formation.
+  </p>
+
+  <h2>Vos droits</h2>
+  <p>
+    Vous pouvez accéder à vos données, les faire rectifier ou effacer, vous opposer à leur traitement, en demander la
+    limitation ou la portabilité, en écrivant à <a href={`mailto:${e.email}`}>{e.email}</a>. Si vous estimez que vos
+    droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (
+    <a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).
+  </p>
+
+  <h2>Cookies et stockage local</h2>
+  <p>
+    Le site ne dépose aucun cookie de mesure d’audience ni de publicité. Deux préférences peuvent être enregistrées dans
+    votre navigateur (stockage local), et jamais transmises : votre accord pour afficher la carte Google, et les cases
+    cochées de la liste des documents. Le détail, et le moyen de les effacer, sont sur la page{' '}
+    <a href="/cookies">Cookies</a>.
+  </p>
+</Legal>

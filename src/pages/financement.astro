@@ -1,0 +1,409 @@
+---
+import Base from '../layouts/Base.astro'
+import FormulaireDemande from '../components/formulaire/FormulaireDemande.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Questions from '../components/sections/Questions.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone, { type NomIcone } from '../components/ui/Icone.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { FAQ_FINANCEMENT } from '../data/faq.ts'
+import { FINANCEMENTS, type Financement } from '../data/financements.ts'
+import { FORMATIONS_PUBLIEES } from '../data/formations.ts'
+import { DERNIERE_VERIFICATION, SOURCES } from '../data/sources.ts'
+import { dateLongue } from '../lib/format.ts'
+
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Financement', href: '/financement' },
+]
+
+const ICONE: Record<Financement['id'], NomIcone> = {
+  'permis-1-euro': 'euro',
+  'paiement-3-fois': 'carte',
+  cpf: 'livre',
+  'autres-aides': 'tirelire',
+}
+
+const nomsFormations = (ids: readonly string[] | null) =>
+  ids === null
+    ? ['Toutes les formations']
+    : FORMATIONS_PUBLIEES.filter((f) => ids.includes(f.slug)).map((f) => f.nomCourt)
+
+const comparaison = [
+  { id: 'permis-1-euro', nature: 'Prêt à taux zéro', pourQui: '15 à 25 ans', quand: 'Avant le début de la formation' },
+  { id: 'paiement-3-fois', nature: 'Paiement échelonné', pourQui: 'Tous les élèves', quand: 'À l’inscription' },
+  { id: 'cpf', nature: 'Droits à la formation', pourQui: 'Demandeurs d’emploi, ou salariés avec cofinancement', quand: 'Avant l’inscription' },
+  { id: 'autres-aides', nature: 'Aides locales ou de l’employeur', pourQui: 'Selon votre situation', quand: 'Selon l’organisme' },
+] as const
+---
+
+<Base
+  titre="Financer son permis : CPF, 1 € par jour, 3 fois"
+  description="Financer votre permis : permis à 1 € par jour pour les 15-25 ans, paiement en 3 fois sans frais, CPF selon votre situation et autres aides. Conditions 2026."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Financement">
+    <Fragment slot="titre">Les solutions pour <span class="accent">financer</span> votre permis</Fragment>
+    Prêt à taux zéro, paiement échelonné, CPF, aides locales : chaque solution a ses conditions. Voici lesquelles, et
+    comment nous vous aidons à les vérifier.
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="#etude">
+        Étudier mon financement <Icone nom="fleche" />
+      </a>
+      <a class="bouton bouton--contour-clair" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" /> Nous appeler
+      </a>
+    </Fragment>
+    <nav slot="bas" class="ancres" aria-label="Les solutions">
+      <ul>
+        {
+          FINANCEMENTS.map((f) => (
+            <li>
+              <a href={`#${f.id}`}>
+                <Icone nom={ICONE[f.id]} />
+                {f.titre}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </HerosPage>
+
+  <div class="avertissement conteneur">
+    <Icone nom="info" />
+    <p>
+      <strong>Aucune aide n’est automatique.</strong> Chaque dispositif dépend de votre âge, de votre situation et de la
+      formation choisie. Règles vérifiées le {dateLongue(DERNIERE_VERIFICATION)} ; elles peuvent évoluer.
+    </p>
+  </div>
+
+  {
+    FINANCEMENTS.map((f, i) => (
+      <section id={f.id} class:list={['section financement-detail', { 'section--gris': i % 2 === 1 }]} aria-labelledby={`titre-${f.id}`}>
+        <div class="conteneur financement-detail__grille">
+          <div>
+            <span class="financement-detail__icone">
+              <Icone nom={ICONE[f.id]} />
+            </span>
+            <p class="financement-detail__mention">{f.mention}</p>
+            <h2 id={`titre-${f.id}`} class="financement-detail__titre">{f.titre}</h2>
+            <p class="chapo">{f.resume}</p>
+            <h3 class="financement-detail__sous-titre">Pour qui ?</h3>
+            <p>{f.pourQui}</p>
+            <h3 class="financement-detail__sous-titre">Formations concernées</h3>
+            <ul class="financement-detail__formations">
+              {nomsFormations(f.formations).map((n) => <li>{n}</li>)}
+            </ul>
+          </div>
+          <div class="carte financement-detail__carte">
+            <h3 class="financement-detail__sous-titre">À savoir</h3>
+            <ul class="liste-coches">
+              {f.points.map((p) => (
+                <li>
+                  <Icone nom="coche-cercle" />
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+            <h3 class="financement-detail__sous-titre">La démarche</h3>
+            <p>{f.demarche}</p>
+            {f.id === 'paiement-3-fois' && ETABLISSEMENT.paiementPlusieursFois.conditions && (
+              <p class="texte-doux">{ETABLISSEMENT.paiementPlusieursFois.conditions}</p>
+            )}
+            {f.sources.length > 0 && (
+              <ul class="financement-detail__sources">
+                {f.sources.map((cle) => (
+                  <li>
+                    <a href={SOURCES[cle].url} target="_blank" rel="noopener">
+                      {SOURCES[cle].titre}
+                      <span class="visuellement-masque"> (nouvel onglet)</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <a class="lien-fleche" href={`#etude`} data-financement={f.id}>
+              En parler avec nous <Icone nom="fleche" />
+            </a>
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="section surface-nuit comparaison" aria-labelledby="titre-comparaison">
+    <div class="conteneur">
+      <EnteteSection etiquette="Comparatif" id="titre-comparaison">
+        <Fragment slot="titre">Les solutions <span class="accent">côte à côte</span></Fragment>
+      </EnteteSection>
+      <ul class="comparaison__grille">
+        {
+          comparaison.map((c) => {
+            const f = FINANCEMENTS.find((x) => x.id === c.id)!
+            return (
+              <li class="comparaison__carte">
+                <Icone nom={ICONE[f.id]} />
+                <h3>{f.titre}</h3>
+                <dl>
+                  <div>
+                    <dt>Nature</dt>
+                    <dd>{c.nature}</dd>
+                  </div>
+                  <div>
+                    <dt>Pour qui</dt>
+                    <dd>{c.pourQui}</dd>
+                  </div>
+                  <div>
+                    <dt>Quand s’en occuper</dt>
+                    <dd>{c.quand}</dd>
+                  </div>
+                </dl>
+              </li>
+            )
+          })
+        }
+      </ul>
+    </div>
+  </section>
+
+  <Questions
+    questions={FAQ_FINANCEMENT}
+    id="titre-faq-financement"
+    etiquette="Financement"
+    titreDebut="Questions sur"
+    titreAccent="le financement"
+  />
+
+  <section id="etude" class="section section--ciel" aria-labelledby="titre-etude">
+    <div class="conteneur etude">
+      <div>
+        <EnteteSection etiquette="Étude personnalisée" id="titre-etude">
+          <Fragment slot="titre">Étudier <span class="accent">mon financement</span></Fragment>
+          Indiquez la formation et la solution envisagée : nous regardons avec vous ce qui est possible dans votre
+          situation.
+        </EnteteSection>
+      </div>
+      <div class="carte etude__carte">
+        <FormulaireDemande id="demande-financement" variante="financement" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ancres ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-3);
+    margin-block-start: var(--e-7);
+    list-style: none;
+  }
+
+  .ancres a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-2);
+    min-height: 2.75rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: 999px;
+    color: var(--sur-nuit);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+
+  .ancres a:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .ancres :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--petrole-clair);
+  }
+
+  .avertissement {
+    display: flex;
+    gap: var(--e-3);
+    margin-block-start: var(--e-6);
+  }
+
+  .avertissement > :global(svg) {
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--petrole-fonce);
+  }
+
+  .avertissement p {
+    max-width: 52rem;
+    padding-block-end: var(--e-2);
+  }
+
+  .financement-detail__grille {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+
+  .financement-detail__icone {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-block-end: var(--e-4);
+    border-radius: var(--rayon);
+    background: var(--nuit);
+    color: var(--petrole-clair);
+  }
+
+  .financement-detail__icone :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .financement-detail__mention {
+    display: inline-block;
+    margin-block-end: var(--e-3);
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+    background: var(--ciel);
+    color: var(--petrole-tres-fonce);
+    font-size: var(--taille-petit);
+    font-weight: 700;
+  }
+
+  .financement-detail__titre {
+    margin-block-end: var(--e-4);
+  }
+
+  .financement-detail__sous-titre {
+    margin-block: var(--e-5) var(--e-2);
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+  }
+
+  .financement-detail__formations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+    list-style: none;
+  }
+
+  .financement-detail__formations li {
+    padding: 0.2rem 0.7rem;
+    border: 1px solid var(--filet);
+    border-radius: 999px;
+    background: var(--blanc);
+    font-size: var(--taille-petit);
+    font-weight: 600;
+  }
+
+  .financement-detail__carte {
+    padding: clamp(1.25rem, 1rem + 2vw, 2.25rem);
+  }
+
+  .financement-detail__carte .financement-detail__sous-titre:first-child {
+    margin-block-start: 0;
+  }
+
+  .financement-detail__carte .lien-fleche {
+    margin-block-start: var(--e-5);
+  }
+
+  .financement-detail__sources {
+    display: grid;
+    gap: var(--e-1);
+    margin-block-start: var(--e-4);
+    padding-inline-start: 1.1rem;
+    font-size: var(--taille-petit);
+  }
+
+  .comparaison__grille {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .comparaison__carte {
+    padding: var(--e-5);
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon);
+    background: var(--nuit-2);
+  }
+
+  .comparaison__carte > :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-block-end: var(--e-3);
+    color: var(--petrole-clair);
+  }
+
+  .comparaison__carte h3 {
+    margin-block-end: var(--e-4);
+    font-size: 1.35rem;
+  }
+
+  .comparaison__carte dl {
+    display: grid;
+    gap: var(--e-3);
+    margin: 0;
+  }
+
+  .comparaison__carte dt {
+    font-size: var(--taille-mini);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--petrole-clair);
+  }
+
+  .comparaison__carte dd {
+    margin: 0;
+    color: var(--sur-nuit-doux);
+  }
+
+  .etude {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+
+  .etude__carte {
+    padding: clamp(1.25rem, 1rem + 2vw, 2.5rem);
+  }
+
+  @media (min-width: 40rem) {
+    .comparaison__grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .financement-detail__grille {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--e-8);
+    }
+
+    .comparaison__grille {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .etude {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: var(--e-8);
+    }
+  }
+</style>
+
+<script>
+  // « En parler avec nous » présélectionne la solution dans le formulaire d’étude.
+  for (const lien of document.querySelectorAll<HTMLAnchorElement>('[data-financement]')) {
+    lien.addEventListener('click', () => {
+      const select = document.querySelector<HTMLSelectElement>('#demande-financement-financement')
+      if (select) select.value = lien.dataset.financement ?? ''
+    })
+  }
+</script>

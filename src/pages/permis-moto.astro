@@ -1,0 +1,122 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import Comparatif from '../components/sections/Comparatif.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Questions from '../components/sections/Questions.astro'
+import CarteFormation from '../components/ui/CarteFormation.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import Visuel from '../components/ui/Visuel.astro'
+import '../styles/rubrique.css'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { formationsDe } from '../data/formations.ts'
+import type { Question } from '../data/faq.ts'
+
+const formations = formationsDe('moto')
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Permis moto', href: '/permis-moto' },
+]
+const publiee = (slug: string) => formations.some((f) => f.slug === slug)
+
+const lignes = [
+  { slug: 'permis-am', intitule: 'Permis AM', valeurs: ['14 ans', 'ASSR 1, ASSR 2 ou ASR', '8 heures', 'Aucun', 'Cyclomoteur 50 cm³, voiturette'] },
+  { slug: 'permis-a1', intitule: 'Permis A1', valeurs: ['16 ans', 'Code moto (ETM)', '20 h, dont 8 sur plateau', 'Plateau, puis circulation', '125 cm³ et 11 kW au plus'] },
+  { slug: 'formation-125', intitule: 'Formation 125 cm³', valeurs: ['Permis B depuis 2 ans', 'Permis B', '7 heures', 'Aucun', '125 cm³ et 11 kW au plus'] },
+  { slug: 'permis-a2', intitule: 'Permis A2', valeurs: ['18 ans', 'Code moto (ETM)', '20 h, dont 8 sur plateau', 'Plateau, puis circulation', 'Jusqu’à 35 kW'] },
+  { slug: 'passerelle-a2-a', intitule: 'Passerelle A2 vers A', valeurs: ['Permis A2 depuis 2 ans', 'Permis A2', '7 heures', 'Aucun', 'Toutes les motos'] },
+]
+  .filter((l) => publiee(l.slug))
+  .map((l) => ({ intitule: l.intitule, href: `/${l.slug}`, valeurs: l.valeurs }))
+
+const questions: Question[] = [
+  {
+    question: 'Quel permis moto choisir ?',
+    reponse:
+      'Cela dépend de votre âge et de vos permis actuels : AM dès 14 ans pour un scooter de 50 cm³, A1 dès 16 ans pour une 125, A2 dès 18 ans jusqu’à 35 kW. Avec deux ans de permis B, la formation 125 suffit pour une 125. Nous vous orientons au téléphone ou au bureau.',
+  },
+  {
+    question: 'Faut-il repasser le code pour la moto ?',
+    reponse:
+      'Pour les permis A1 et A2, oui : l’épreuve théorique moto (ETM) est demandée, même avec le code voiture. Les formations 125, AM et la passerelle vers le A n’ont pas d’examen.',
+  },
+  {
+    question: 'Quel équipement faut-il ?',
+    reponse:
+      'Un casque et des gants homologués sont obligatoires. Pour la formation et l’examen des permis A1 et A2, il faut aussi un blouson, un pantalon et des chaussures montantes.',
+  },
+  {
+    question: 'Comment passer du A2 au permis A ?',
+    reponse: 'Après deux ans de permis A2, par une formation de 7 heures, sans examen.',
+  },
+]
+---
+
+<Base
+  titre="Permis moto : A1, A2, 125, AM"
+  description="Permis moto : A1 dès 16 ans, A2 dès 18 ans, passerelle vers le permis A, formation 125 cm³ avec le permis B et permis AM. Comparez et demandez un devis."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Nos formations">
+    <Fragment slot="titre">Les permis <span class="accent">moto</span></Fragment>
+    Du scooter 50 cm³ dès 14 ans jusqu’au permis A : prenez la route à deux roues avec une formation adaptée à votre âge
+    et à votre expérience.
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/contact#demande">
+        Demander un devis <Icone nom="fleche" />
+      </a>
+      <a class="bouton bouton--contour-clair" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" /> Nous appeler
+      </a>
+    </Fragment>
+    <div slot="visuel" class="hub-visuel">
+      <Visuel motif="moto" />
+    </div>
+  </HerosPage>
+
+  <section class="section" aria-labelledby="titre-liste">
+    <div class="conteneur">
+      <EnteteSection etiquette="Permis moto" id="titre-liste">
+        <Fragment slot="titre">Choisissez <span class="accent">votre formation</span></Fragment>
+        Chaque page détaille les prérequis, le déroulement, la durée, les documents et les financements possibles.
+      </EnteteSection>
+      <div class="hub-grille hub-grille--5">
+        {
+          formations.map((f) => (
+            <CarteFormation
+              titre={f.nom}
+              resume={f.resume}
+              href={`/${f.slug}`}
+              motif={f.visuel}
+            />
+          ))
+        }
+      </div>
+      <p class="hub-note">
+        <Icone nom="bouclier" />
+        <span>
+          Casque et gants homologués obligatoires. Pour les permis A1 et A2, prévoyez aussi un blouson, un pantalon et
+          des chaussures montantes.
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--gris" aria-labelledby="titre-comparatif">
+    <div class="conteneur">
+      <EnteteSection etiquette="Comparatif" id="titre-comparatif">
+        <Fragment slot="titre">Quel permis <span class="accent">pour vous</span> ?</Fragment>
+        Âges et durées minimales fixés par la réglementation.
+      </EnteteSection>
+      <Comparatif
+        legende="Comparatif des formations au permis moto"
+        colonnes={['Âge minimum', 'Prérequis', 'Formation', 'Examen', 'Véhicules']}
+        lignes={lignes}
+      />
+    </div>
+  </section>
+
+  <Questions questions={questions} id="titre-faq-moto" etiquette="Permis moto" titreDebut="Bien" titreAccent="choisir" />
+  <AppelFinal />
+</Base>

@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro'
+import APropos from '../components/accueil/APropos.astro'
+import BandeConfiance from '../components/accueil/BandeConfiance.astro'
+import Financement from '../components/accueil/Financement.astro'
+import Formations from '../components/accueil/Formations.astro'
+import Garanties from '../components/accueil/Garanties.astro'
+import HerosAccueil from '../components/accueil/HerosAccueil.astro'
+import Parcours from '../components/accueil/Parcours.astro'
+import Pourquoi from '../components/accueil/Pourquoi.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import AvisGoogle from '../components/sections/AvisGoogle.astro'
+import Localisation from '../components/sections/Localisation.astro'
+import Questions from '../components/sections/Questions.astro'
+import { FAQ_ACCUEIL } from '../data/faq.ts'
+---
+
+<Base
+  titre={null}
+  description="Auto-moto école depuis 2010 : code de la route, permis B en boîte manuelle ou automatique, conduite accompagnée, permis moto A1 et A2."
+>
+  <HerosAccueil />
+  <BandeConfiance />
+  <Formations />
+  <APropos />
+  <Pourquoi />
+  <Garanties />
+  <Financement />
+  <Parcours />
+  <AvisGoogle />
+  <Questions questions={FAQ_ACCUEIL} id="titre-faq" />
+  <Localisation />
+  <AppelFinal />
+</Base>

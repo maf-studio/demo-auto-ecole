@@ -1,0 +1,631 @@
+---
+import Icone from '../ui/Icone.astro'
+import Logo from '../ui/Logo.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { MENU } from '../../data/navigation.ts'
+import { heure, libelleJours } from '../../lib/horaires.ts'
+
+const chemin = Astro.url.pathname.replace(/\/$/, '') || '/'
+const actif = (href: string) => href === chemin
+const actifDans = (hrefs: string[]) => hrefs.includes(chemin)
+---
+
+<header class="entete surface-nuit" data-entete>
+  <div class="conteneur entete__barre">
+    <a href="/" class="entete__logo" aria-label={`${ETABLISSEMENT.nom}, accueil`}>
+      <Logo id="logo-entete" />
+    </a>
+
+    <nav class="nav" aria-label="Navigation principale">
+      <ul class="nav__liste">
+        {
+          MENU.map((entree, i) =>
+            entree.sousMenu ? (
+              <li class="nav__item" data-sous-menu>
+                <a
+                  href={entree.href}
+                  class="nav__lien"
+                  aria-current={actif(entree.href) ? 'page' : undefined}
+                  data-actif={actifDans([entree.href, ...entree.sousMenu.map((s) => s.href)]) ? '' : undefined}
+                >
+                  {entree.libelle}
+                </a>
+                <button class="nav__bascule" type="button" aria-expanded="false" aria-controls={`sous-menu-${i}`}>
+                  <span class="visuellement-masque">Ouvrir le sous-menu {entree.libelle}</span>
+                  <Icone nom="chevron" />
+                </button>
+                <div class="sous-menu" id={`sous-menu-${i}`}>
+                  <ul>
+                    {entree.sousMenu.map((lien) => (
+                      <li>
+                        <a
+                          href={lien.href}
+                          class:list={['sous-menu__lien', { 'sous-menu__lien--tout': !lien.description }]}
+                          aria-current={actif(lien.href) ? 'page' : undefined}
+                        >
+                          <span class="sous-menu__titre">{lien.libelle}</span>
+                          {lien.description && <span class="sous-menu__description">{lien.description}</span>}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ) : (
+              <li class="nav__item">
+                <a href={entree.href} class="nav__lien" aria-current={actif(entree.href) ? 'page' : undefined}>
+                  {entree.libelle}
+                </a>
+              </li>
+            ),
+          )
+        }
+      </ul>
+    </nav>
+
+    <div class="entete__actions">
+      <a class="entete__tel" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" />
+        <span class="entete__tel-numero">{ETABLISSEMENT.telephone.affiche}</span>
+        <span class="visuellement-masque entete__tel-masque">Appeler le {ETABLISSEMENT.telephone.affiche}</span>
+      </a>
+      <a class="bouton bouton--petit entete__devis" href="/contact#demande">Demander un devis</a>
+      <button class="entete__burger" type="button" popovertarget="menu-mobile" aria-haspopup="dialog">
+        <Icone nom="menu" />
+        <span>Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="menu-mobile" popover class="menu-mobile surface-nuit" role="dialog" aria-label="Menu">
+    <div class="menu-mobile__haut">
+      <a href="/" class="menu-mobile__logo" aria-label={`${ETABLISSEMENT.nom}, accueil`}>
+        <Logo id="logo-menu" />
+      </a>
+      <button class="menu-mobile__fermer" type="button" popovertarget="menu-mobile" popovertargetaction="hide">
+        <Icone nom="fermer" />
+        <span class="visuellement-masque">Fermer le menu</span>
+      </button>
+    </div>
+
+    <nav aria-label="Navigation principale (mobile)">
+      <ul class="menu-mobile__liste">
+        {
+          MENU.map((entree) =>
+            entree.sousMenu ? (
+              <li>
+                <details class="menu-mobile__groupe" open={actifDans([entree.href, ...entree.sousMenu.map((s) => s.href)])}>
+                  <summary>
+                    {entree.libelle}
+                    <Icone nom="chevron" />
+                  </summary>
+                  <ul>
+                    {entree.sousMenu.map((lien) => (
+                      <li>
+                        <a href={lien.href} aria-current={actif(lien.href) ? 'page' : undefined}>
+                          {lien.libelle}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            ) : (
+              <li>
+                <a class="menu-mobile__lien" href={entree.href} aria-current={actif(entree.href) ? 'page' : undefined}>
+                  {entree.libelle}
+                </a>
+              </li>
+            ),
+          )
+        }
+      </ul>
+    </nav>
+
+    <div class="menu-mobile__actions">
+      <a class="bouton" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" />
+        Appeler le {ETABLISSEMENT.telephone.affiche}
+      </a>
+      <a class="bouton bouton--contour-clair" href="/contact#demande">Demander un devis</a>
+    </div>
+
+    <dl class="menu-mobile__horaires">
+      <dt>Bureau</dt>
+      {
+        ETABLISSEMENT.horairesBureau.map((h) => (
+          <dd>
+            {libelleJours(h.jours)} : {h.plages.map(([d, f]) => `${heure(d)}–${heure(f)}`).join(', ')}
+          </dd>
+        ))
+      }
+      <dt>Conduite</dt>
+      {
+        ETABLISSEMENT.horairesConduite.map((h) => (
+          <dd>
+            {libelleJours(h.jours)} : {h.plages.map(([d, f]) => `${heure(d)}–${heure(f)}`).join(', ')}
+          </dd>
+        ))
+      }
+    </dl>
+  </div>
+</header>
+
+<style>
+  .entete {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 50;
+    background: rgb(7 29 43 / 0.94);
+    backdrop-filter: saturate(1.4) blur(12px);
+    border-block-end: 1px solid transparent;
+    transition: border-color var(--duree) var(--courbe), box-shadow var(--duree) var(--courbe);
+  }
+
+  .entete[data-defile] {
+    border-block-end-color: var(--filet-nuit);
+    box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.6);
+  }
+
+  .entete__barre {
+    display: flex;
+    align-items: center;
+    gap: var(--e-5);
+    height: var(--entete);
+  }
+
+  .entete__logo {
+    flex: none;
+    display: block;
+    width: 7.6rem;
+    padding-block: 0.3rem;
+  }
+
+  /* ------------------------------------------------ Navigation (bureau) */
+
+  .nav {
+    display: none;
+    margin-inline-start: auto;
+  }
+
+  .nav__liste {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    list-style: none;
+  }
+
+  .nav__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav__lien {
+    display: block;
+    padding: 0.55rem 0.6rem;
+    color: var(--sur-nuit);
+    font-size: 0.93rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    border-radius: var(--rayon-s);
+    position: relative;
+  }
+
+  .nav__lien:hover {
+    color: var(--petrole-clair);
+  }
+
+  .nav__lien[aria-current='page'],
+  .nav__lien[data-actif] {
+    color: var(--petrole-clair);
+  }
+
+  .nav__lien[aria-current='page']::after,
+  .nav__lien[data-actif]::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0.6rem;
+    inset-block-end: 0.15rem;
+    height: 2px;
+    background: var(--petrole-clair);
+    transform: skewX(var(--biais));
+  }
+
+  .nav__item[data-sous-menu] > .nav__lien {
+    padding-inline-end: 0.1rem;
+  }
+
+  .nav__item[data-sous-menu] > .nav__lien::after {
+    inset-inline-end: 0;
+  }
+
+  .nav__bascule {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sur-nuit-doux);
+    cursor: pointer;
+  }
+
+  .nav__bascule svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform var(--duree) var(--courbe);
+  }
+
+  [data-ouvert] > .nav__bascule svg {
+    transform: rotate(180deg);
+  }
+
+  .sous-menu {
+    position: absolute;
+    inset-block-start: calc(100% + 0.4rem);
+    inset-inline-start: -0.5rem;
+    min-width: 17rem;
+    padding: var(--e-2);
+    background: var(--blanc);
+    color: var(--encre);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre-forte);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition:
+      opacity var(--duree-courte) var(--courbe),
+      transform var(--duree-courte) var(--courbe),
+      visibility 0s linear var(--duree-courte);
+  }
+
+  /* Un pont invisible : la souris passe du lien au sous-menu sans le fermer. */
+  .sous-menu::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: -0.6rem;
+    height: 0.6rem;
+  }
+
+  .nav__item[data-ouvert] > .sous-menu,
+  .nav__item:focus-within > .sous-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  @media (hover: hover) {
+    .nav__item:hover > .sous-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition-delay: 0s;
+    }
+  }
+
+  .sous-menu ul {
+    list-style: none;
+    display: grid;
+  }
+
+  .sous-menu__lien {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--rayon-s);
+    color: var(--encre);
+    text-decoration: none;
+  }
+
+  .sous-menu__lien:hover,
+  .sous-menu__lien[aria-current='page'] {
+    background: var(--ciel-voile);
+    color: var(--encre);
+  }
+
+  .sous-menu__titre {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .sous-menu__description {
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+    line-height: 1.3;
+  }
+
+  .sous-menu__lien--tout {
+    margin-block-start: var(--e-1);
+    border-block-start: 1px solid var(--filet);
+    border-radius: 0 0 var(--rayon-s) var(--rayon-s);
+  }
+
+  .sous-menu__lien--tout .sous-menu__titre {
+    color: var(--petrole-fonce);
+    font-family: var(--police-titre);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ------------------------------------------------ Actions */
+
+  .entete__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--e-4);
+    margin-inline-start: auto;
+  }
+
+  .entete__tel {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .entete__tel svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--petrole-clair);
+  }
+
+  .entete__tel:hover {
+    color: var(--petrole-clair);
+  }
+
+  .entete__tel-masque {
+    display: none;
+  }
+
+  .entete__devis {
+    display: none;
+  }
+
+  .entete__burger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon-s);
+    background: rgb(255 255 255 / 0.04);
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .entete__burger svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  @media (min-width: 40rem) {
+    .entete__logo {
+      width: 8.4rem;
+    }
+
+    .entete__tel {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .entete__devis {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 75rem) {
+    .nav {
+      display: block;
+    }
+
+    .entete__actions {
+      margin-inline-start: var(--e-2);
+    }
+
+    .entete__burger {
+      display: none;
+    }
+
+    /* Entre 75 et 90 rem, le numéro se réduit à son pictogramme. */
+    .entete__tel-numero {
+      display: none;
+    }
+
+    .entete__tel-masque {
+      display: inline;
+    }
+
+    .entete__tel svg {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+  }
+
+  @media (min-width: 90rem) {
+    .entete__tel-numero {
+      display: inline;
+    }
+
+    .entete__tel-masque {
+      display: none;
+    }
+
+    .nav__lien {
+      padding-inline: 0.75rem;
+      font-size: 0.97rem;
+    }
+  }
+
+  /* ------------------------------------------------ Menu mobile */
+
+  .menu-mobile {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(100%, 26rem);
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: var(--e-4) var(--gouttiere) var(--e-6);
+    border: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: -20px 0 50px rgb(0 0 0 / 0.4);
+  }
+
+  .menu-mobile::backdrop {
+    background: rgb(7 29 43 / 0.55);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu-mobile:popover-open {
+      animation: glisse var(--duree) var(--courbe);
+    }
+
+    @keyframes glisse {
+      from {
+        transform: translateX(30px);
+        opacity: 0;
+      }
+    }
+  }
+
+  .menu-mobile__haut {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: var(--e-5);
+  }
+
+  .menu-mobile__logo {
+    width: 7.6rem;
+  }
+
+  .menu-mobile__fermer {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon-s);
+    background: none;
+    color: var(--sur-nuit);
+    cursor: pointer;
+  }
+
+  .menu-mobile__fermer svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .menu-mobile__liste {
+    list-style: none;
+    border-block-start: 1px solid var(--filet-nuit);
+  }
+
+  .menu-mobile__liste > li {
+    border-block-end: 1px solid var(--filet-nuit);
+  }
+
+  .menu-mobile__lien,
+  .menu-mobile__groupe summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.4rem;
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .menu-mobile__groupe summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-mobile__groupe summary svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--petrole-clair);
+    transition: transform var(--duree) var(--courbe);
+  }
+
+  .menu-mobile__groupe[open] summary svg {
+    transform: rotate(180deg);
+  }
+
+  .menu-mobile__groupe ul {
+    list-style: none;
+    display: grid;
+    padding-block-end: var(--e-3);
+  }
+
+  .menu-mobile__groupe a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline-start: var(--e-4);
+    border-inline-start: 2px solid var(--nuit-3);
+    color: var(--sur-nuit-doux);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .menu-mobile__groupe a:hover,
+  .menu-mobile__groupe a[aria-current='page'],
+  .menu-mobile__lien[aria-current='page'] {
+    color: var(--petrole-clair);
+    border-inline-start-color: var(--petrole-clair);
+  }
+
+  .menu-mobile__actions {
+    display: grid;
+    gap: var(--e-4);
+    margin-block: var(--e-6);
+  }
+
+  .menu-mobile__horaires {
+    display: grid;
+    gap: var(--e-1);
+    margin: 0;
+    font-size: var(--taille-petit);
+    color: var(--sur-nuit-doux);
+  }
+
+  .menu-mobile__horaires dt {
+    margin-block-start: var(--e-3);
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .menu-mobile__horaires dd {
+    margin: 0;
+  }
+</style>

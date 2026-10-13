@@ -1,0 +1,634 @@
+/*
+ * ============================================================================
+ * SITE D’AUTO-ÉCOLE (DÉMONSTRATION) : le système de styles
+ * ============================================================================
+ * Direction artistique tirée du dépliant de l’établissement : bleu nuit,
+ * bleu pétrole, capitales condensées, bandeaux inclinés, lignes de route
+ * en pointillés, signature manuscrite « depuis 2010 ».
+ *
+ * Aucune couleur en dur dans les composants : uniquement ces variables.
+ * Contrastes calculés (WCAG AA) :
+ *   blanc sur --petrole-fonce      5,83:1   (boutons, étiquettes)
+ *   --petrole-fonce sur blanc      5,83:1   (liens, petits accents)
+ *   --petrole sur blanc            3,89:1   → décor, ou texte ≥ 24 px gras
+ *   --petrole-clair sur --nuit     8,99:1   (accents sur fond sombre)
+ *   --texte-doux sur blanc         6,95:1 ; sur --gris 6,41:1 ; sur --ciel 5,75:1
+ *   --sur-nuit-doux sur --nuit-2   7,29:1
+ */
+
+:root {
+  /* Couleurs de la marque */
+  --nuit: #071d2b;
+  --nuit-2: #0c2a3d;
+  --nuit-3: #143a52;
+  --petrole: #398ba4;
+  --petrole-fonce: #256d85;
+  --petrole-tres-fonce: #1b5669;
+  --petrole-clair: #7cc6dc;
+  --ciel: #d9edf3;
+  --ciel-voile: #eef7fa;
+  --gris: #f4f6f7;
+  --filet: #dde5e9;
+  --bord-champ: #6b7b86;
+  --filet-nuit: rgb(255 255 255 / 0.12);
+  --encre: #20252b;
+  --texte-doux: #4f5b66;
+  --sur-nuit: #ffffff;
+  --sur-nuit-doux: #a8b8c3;
+  --or: #f5bb23;
+  --logo-haut: #5db3d1;
+  --logo-bas: #2c84a2;
+  --blanc: #ffffff;
+  --erreur: #b3261e;
+  --erreur-voile: #fdecea;
+  --succes: #1e6b3a;
+  --succes-voile: #e8f5ec;
+
+  /* Polices (déclarées dans astro.config.mjs) */
+  --police-titre: var(--font-titre), 'Arial Narrow', Arial, sans-serif;
+  --police-titre-italique: var(--font-titre-italique), 'Arial Narrow', Arial, sans-serif;
+  --police-texte: var(--font-texte), 'Helvetica Neue', Arial, sans-serif;
+  --police-signature: var(--font-signature), cursive;
+
+  /* Échelle */
+  --taille-heros: clamp(2.9rem, 1.6rem + 5.4vw, 5.6rem);
+  --taille-h1: clamp(2.5rem, 1.6rem + 3.6vw, 4.4rem);
+  --taille-h2: clamp(2.1rem, 1.5rem + 2.6vw, 3.6rem);
+  --taille-h3: clamp(1.45rem, 1.2rem + 0.8vw, 1.85rem);
+  --taille-chapo: clamp(1.06rem, 1rem + 0.3vw, 1.22rem);
+  --taille-texte: 1rem;
+  --taille-petit: 0.875rem;
+  --taille-mini: 0.78rem;
+
+  /* Espacements */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4rem;
+  --e-9: 6rem;
+  --section: clamp(4rem, 2.5rem + 6vw, 7.5rem);
+  --gouttiere: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --largeur: 78rem;
+  --largeur-texte: 42rem;
+
+  /* Formes */
+  --rayon-s: 6px;
+  --rayon: 12px;
+  --rayon-l: 20px;
+  --biais: -10deg;
+  --ombre: 0 1px 2px rgb(7 29 43 / 0.05), 0 10px 30px -12px rgb(7 29 43 / 0.18);
+  --ombre-forte: 0 2px 4px rgb(7 29 43 / 0.06), 0 24px 48px -20px rgb(7 29 43 / 0.35);
+
+  /* Mouvement (miroir : src/lib/mouvement.ts) */
+  --duree-courte: 160ms;
+  --duree: 260ms;
+  --duree-longue: 700ms;
+  --courbe: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Hauteur de l’en-tête collant, et de la barre d’actions sur téléphone */
+  --entete: 4.25rem;
+  --barre-mobile: 4.25rem;
+
+  color-scheme: light;
+}
+
+/* -------------------------------------------------------------- Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-block-start: calc(var(--entete) + 1rem);
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--blanc);
+  color: var(--encre);
+  font-family: var(--police-texte);
+  font-size: var(--taille-texte);
+  line-height: 1.65;
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sur téléphone, la barre d’actions fixe ne recouvre jamais la fin de page. */
+@media (max-width: 63.99rem) {
+  body {
+    padding-block-end: calc(var(--barre-mobile) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: var(--petrole-fonce);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--petrole-tres-fonce);
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--petrole-fonce);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.surface-nuit :focus-visible {
+  outline-color: var(--petrole-clair);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--taille-h1);
+}
+
+h2 {
+  font-size: var(--taille-h2);
+}
+
+h3 {
+  font-size: var(--taille-h3);
+  font-weight: 700;
+  line-height: 1.02;
+}
+
+h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0;
+}
+
+p + p {
+  margin-block-start: var(--e-4);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--ciel);
+  color: var(--nuit);
+}
+
+/* -------------------------------------------------------------- Mise en page */
+
+.conteneur {
+  width: 100%;
+  max-width: calc(var(--largeur) + 2 * var(--gouttiere));
+  margin-inline: auto;
+  padding-inline: var(--gouttiere);
+}
+
+.section {
+  padding-block: var(--section);
+  position: relative;
+}
+
+.section--serree {
+  padding-block: calc(var(--section) * 0.6);
+}
+
+.section--gris {
+  background: var(--gris);
+}
+
+.section--ciel {
+  background: var(--ciel-voile);
+}
+
+.surface-nuit {
+  background: var(--nuit);
+  color: var(--sur-nuit);
+}
+
+.surface-nuit a:not([class]) {
+  color: var(--petrole-clair);
+}
+
+.texte-doux {
+  color: var(--texte-doux);
+}
+
+.surface-nuit .texte-doux {
+  color: var(--sur-nuit-doux);
+}
+
+.visuellement-masque {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.lien-evitement {
+  position: absolute;
+  inset-inline-start: var(--e-4);
+  inset-block-start: -10rem;
+  z-index: 100;
+  padding: var(--e-3) var(--e-5);
+  background: var(--blanc);
+  color: var(--nuit);
+  font-weight: 700;
+  border-radius: var(--rayon-s);
+  box-shadow: var(--ombre-forte);
+}
+
+.lien-evitement:focus {
+  inset-block-start: var(--e-4);
+}
+
+/* -------------------------------------------------------------- Titres */
+
+/* Le mot clé d’un titre : italique sportif, en pétrole. Un seul par titre. */
+.accent {
+  font-family: var(--police-titre-italique);
+  font-style: italic;
+  font-weight: 800;
+  color: var(--petrole-fonce);
+  padding-inline-end: 0.06em;
+}
+
+.surface-nuit .accent {
+  color: var(--petrole-clair);
+}
+
+.chapo {
+  font-size: var(--taille-chapo);
+  line-height: 1.6;
+  color: var(--texte-doux);
+  max-width: var(--largeur-texte);
+  text-wrap: pretty;
+}
+
+.surface-nuit .chapo {
+  color: var(--sur-nuit-doux);
+}
+
+.signature {
+  font-family: var(--police-signature);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* -------------------------------------------------------------- Boutons */
+
+/*
+ * Le bouton du dépliant : un parallélogramme. Le fond est incliné par un
+ * pseudo-élément, le texte reste droit et l’anneau de focus suit la boîte.
+ */
+.bouton {
+  --fond: var(--petrole-fonce);
+  --fond-survol: var(--petrole-tres-fonce);
+  --texte: var(--blanc);
+  --bord: transparent;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 3.25rem;
+  padding: 0.7rem 1.6rem;
+  border: 0;
+  background: none;
+  color: var(--texte);
+  font-family: var(--police-titre);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duree) var(--courbe), transform var(--duree) var(--courbe);
+}
+
+.bouton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fond);
+  border: 2px solid var(--bord);
+  border-radius: var(--rayon-s);
+  transform: skewX(var(--biais));
+  transition: background-color var(--duree) var(--courbe), border-color var(--duree) var(--courbe);
+}
+
+.bouton:hover {
+  color: var(--texte);
+  text-decoration: none;
+}
+
+.bouton:hover::before {
+  background: var(--fond-survol);
+}
+
+.bouton:active {
+  transform: translateY(1px);
+}
+
+.bouton svg {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.bouton--contour {
+  --fond: transparent;
+  --fond-survol: var(--ciel-voile);
+  --texte: var(--nuit);
+  --bord: var(--nuit);
+}
+
+.bouton--clair {
+  --fond: var(--blanc);
+  --fond-survol: var(--ciel);
+  --texte: var(--nuit);
+}
+
+.bouton--contour-clair {
+  --fond: transparent;
+  --fond-survol: rgb(255 255 255 / 0.1);
+  --texte: var(--blanc);
+  --bord: rgb(255 255 255 / 0.7);
+}
+
+.bouton--petit {
+  min-height: 2.75rem;
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+}
+
+.boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4) var(--e-5);
+  align-items: center;
+}
+
+/* Lien d’action secondaire : texte + flèche qui avance au survol. */
+.lien-fleche {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-family: var(--police-titre);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--petrole-fonce);
+}
+
+.lien-fleche svg {
+  width: 1.1em;
+  height: 1.1em;
+  transition: transform var(--duree) var(--courbe);
+}
+
+.lien-fleche:hover svg,
+a:hover .lien-fleche svg {
+  transform: translateX(4px);
+}
+
+.surface-nuit .lien-fleche {
+  color: var(--petrole-clair);
+}
+
+/* -------------------------------------------------------------- Cartes */
+
+.carte {
+  position: relative;
+  background: var(--blanc);
+  border: 1px solid var(--filet);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+}
+
+/* Une seule zone de clic par carte : le lien principal couvre toute la carte. */
+.carte__lien::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.carte__lien:focus-visible {
+  outline: none;
+}
+
+.carte:has(.carte__lien:focus-visible) {
+  outline: 3px solid var(--petrole-fonce);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- Motifs */
+
+/* La ligne de route : pointillés blancs ou pétrole. */
+.ligne-route {
+  height: 3px;
+  background-image: repeating-linear-gradient(90deg, currentColor 0 22px, transparent 22px 38px);
+  color: var(--petrole);
+  border: 0;
+  margin: 0;
+}
+
+/* Les points-flèches des horaires du dépliant : 10 h ▶ 12 h */
+.fleche-horaire {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-inline: 0.45em;
+  border-block: 0.32em solid transparent;
+  border-inline-start: 0.48em solid var(--petrole);
+  vertical-align: 0.06em;
+}
+
+/* -------------------------------------------------------------- Listes */
+
+.liste-coches {
+  list-style: none;
+  display: grid;
+  gap: var(--e-3);
+}
+
+.liste-coches li {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: var(--e-3);
+  align-items: start;
+}
+
+.liste-coches li > svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--petrole-fonce);
+  margin-block-start: 0.1rem;
+}
+
+.surface-nuit .liste-coches li > svg {
+  color: var(--petrole-clair);
+}
+
+/* -------------------------------------------------------------- Texte courant */
+
+.prose {
+  max-width: var(--largeur-texte);
+}
+
+.prose h2 {
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.4rem);
+  margin-block: var(--e-7) var(--e-4);
+}
+
+.prose h3 {
+  margin-block: var(--e-6) var(--e-3);
+}
+
+.prose ul {
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--e-2);
+  margin-block: var(--e-4);
+}
+
+.prose p + ul,
+.prose ul + p {
+  margin-block-start: var(--e-4);
+}
+
+/* -------------------------------------------------------------- Mouvement */
+
+/*
+ * Révélations au défilement : jouées une fois, et seulement pour ce qui est
+ * SOUS la ligne de flottaison au chargement (le script ne masque que cela).
+ * Sans JavaScript, ou en mouvement réduit, tout est visible et immobile.
+ */
+.anime-avant {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.anime-apres {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duree-longue) var(--courbe),
+    transform var(--duree-longue) var(--courbe);
+  transition-delay: calc(var(--rang, 0) * 70ms);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* -------------------------------------------------------------- Impression */
+
+@media print {
+  .ne-pas-imprimer,
+  header.entete,
+  footer.pied,
+  .barre-mobile,
+  .haut-de-page {
+    display: none !important;
+  }
+
+  body {
+    padding: 0;
+    color: #000;
+  }
+
+  .surface-nuit {
+    background: none;
+    color: #000;
+  }
+
+  .anime-avant {
+    opacity: 1;
+    transform: none;
+  }
+}

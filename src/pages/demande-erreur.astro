@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro'
+import PageMessage from '../components/sections/PageMessage.astro'
+import Icone from '../components/ui/Icone.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+
+/**
+ * Atteinte sans JavaScript, après un envoi refusé (`?raison=` : champs,
+ * envoi, service, taille, format). La page est statique : le motif est lu par
+ * un petit script ; sans lui, le message général suffit.
+ */
+const e = ETABLISSEMENT
+---
+
+<Base titre="Demande non envoyée" description="Votre demande n’a pas pu être envoyée. Contactez directement Votre Auto-École." noindex>
+  <PageMessage icone="info" ton="erreur">
+    <Fragment slot="titre">Demande <span class="accent">non envoyée</span></Fragment>
+    <p data-raison>Votre demande n’a pas pu être envoyée. Rien n’a été transmis.</p>
+    <p>Revenez au formulaire pour réessayer, ou contactez-nous directement au {e.telephone.affiche} ou à {e.email}.</p>
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/contact#demande">Revenir au formulaire</a>
+      <a class="bouton bouton--contour-clair" href={e.telephone.lien}><Icone nom="telephone" /> Appeler</a>
+    </Fragment>
+  </PageMessage>
+</Base>
+
+<script>
+  const MOTIFS: Record<string, string> = {
+    champs: 'Certains champs étaient incomplets ou mal remplis. Rien n’a été transmis.',
+    envoi: 'Le service d’envoi n’a pas répondu. Rien n’a été transmis : réessayez dans un instant.',
+    service: 'Le formulaire en ligne est momentanément indisponible. Rien n’a été transmis.',
+    taille: 'Votre message était trop long. Rien n’a été transmis.',
+  }
+  const raison = new URLSearchParams(location.search).get('raison') ?? ''
+  const zone = document.querySelector('[data-raison]')
+  if (zone && MOTIFS[raison]) zone.textContent = MOTIFS[raison]
+</script>

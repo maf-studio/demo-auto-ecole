@@ -1,0 +1,133 @@
+---
+import Icone from './Icone.astro'
+
+/**
+ * L’illustration large du site, à la place d’une photo : une route en
+ * perspective et trois panneaux ronds, le code (triangle), la voiture et la
+ * moto. Même dessin que `Visuel` (cartes des formations), en plus large.
+ * Purement décorative (`aria-hidden`) : une vraie photo peut la remplacer.
+ */
+interface Props {
+  class?: string
+}
+
+const { class: classe } = Astro.props
+---
+
+<div class:list={['scene', classe]} aria-hidden="true">
+  <svg class="scene__route" viewBox="0 0 900 400" preserveAspectRatio="xMidYMax slice">
+    <path class="scene__chaussee" d="M405 150h90l305 250H100z"></path>
+    <path class="scene__bord" d="M405 150 100 400M495 150l305 250"></path>
+    <path class="scene__axe" d="M450 160v240"></path>
+  </svg>
+  <span class="scene__bande"></span>
+  <span class="scene__panneau scene__panneau--code">
+    <svg viewBox="0 0 24 24" class="scene__triangle">
+      <path d="M12 3 22 20H2Z"></path>
+      <path d="M12 9.5v5M12 17.2v.3"></path>
+    </svg>
+  </span>
+  <span class="scene__panneau scene__panneau--voiture"><Icone nom="voiture" /></span>
+  <span class="scene__panneau scene__panneau--moto"><Icone nom="moto" /></span>
+</div>
+
+<style>
+  .scene {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(90% 90% at 75% 0%, rgb(57 139 164 / 0.5), transparent 60%),
+      var(--nuit);
+    isolation: isolate;
+  }
+
+  .scene__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scene__chaussee {
+    fill: var(--nuit-2);
+  }
+
+  .scene__bord {
+    stroke: rgb(255 255 255 / 0.35);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .scene__axe {
+    stroke: var(--blanc);
+    stroke-width: 5;
+    stroke-dasharray: 18 16;
+    fill: none;
+    opacity: 0.85;
+  }
+
+  .scene__bande {
+    position: absolute;
+    inset-block: -20%;
+    inset-inline-end: 10%;
+    width: 14%;
+    background: var(--petrole);
+    opacity: 0.25;
+    transform: skewX(var(--biais));
+  }
+
+  .scene__panneau {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: clamp(5px, 1vw, 9px) solid var(--petrole);
+    border-radius: 50%;
+    background: var(--blanc);
+    color: var(--nuit);
+    box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.6);
+    transform: translateX(-50%);
+  }
+
+  .scene__panneau :global(svg) {
+    width: 52%;
+    height: 52%;
+    stroke-width: 1.8;
+  }
+
+  .scene__panneau--voiture {
+    inset-inline-start: 50%;
+    inset-block-start: 12%;
+    width: 24%;
+    max-width: 9.5rem;
+  }
+
+  .scene__panneau--code,
+  .scene__panneau--moto {
+    inset-block-start: 26%;
+    width: 17%;
+    max-width: 7rem;
+  }
+
+  .scene__panneau--code {
+    inset-inline-start: 22%;
+  }
+
+  .scene__panneau--moto {
+    inset-inline-start: 78%;
+  }
+
+  .scene__triangle path:first-child {
+    fill: none;
+    stroke: var(--erreur);
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+  }
+
+  .scene__triangle path:last-child {
+    fill: none;
+    stroke: var(--nuit);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+</style>

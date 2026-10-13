@@ -1,0 +1,166 @@
+---
+import Icone, { type NomIcone } from '../ui/Icone.astro'
+import { FINANCEMENTS, type Financement } from '../../data/financements.ts'
+
+/**
+ * Les solutions de financement en cartes (accueil, pages formations).
+ * `ids` : la sélection à montrer, dans l’ordre ; toutes par défaut.
+ */
+interface Props {
+  ids?: ReadonlyArray<Financement['id']>
+  surNuit?: boolean
+  niveau?: 2 | 3
+}
+
+const { ids, surNuit = false, niveau = 3 } = Astro.props
+const liste = ids ? ids.map((id) => FINANCEMENTS.find((f) => f.id === id)!).filter(Boolean) : FINANCEMENTS
+const Titre = `h${niveau}` as const
+
+const ICONE: Record<Financement['id'], NomIcone> = {
+  'permis-1-euro': 'euro',
+  'paiement-3-fois': 'carte',
+  cpf: 'livre',
+  'autres-aides': 'tirelire',
+}
+---
+
+<ul class:list={['financements', { 'financements--nuit': surNuit }]}>
+  {
+    liste.map((f, i) => (
+      <li class="financement" data-revele style={`--rang: ${i}`}>
+        <span class="financement__icone">
+          <Icone nom={ICONE[f.id]} />
+        </span>
+        <p class="financement__mention">{f.mention}</p>
+        <Titre class="financement__titre">
+          <a href={`/financement#${f.id}`} class="carte__lien">
+            {f.titre}
+          </a>
+        </Titre>
+        <p class="financement__resume">{f.resume}</p>
+        <span class="lien-fleche financement__lien" aria-hidden="true">
+          En savoir plus <Icone nom="fleche" />
+        </span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .financements {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .financement {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    padding: var(--e-5);
+    border: 1px solid var(--filet);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+    transition:
+      transform var(--duree) var(--courbe),
+      border-color var(--duree) var(--courbe),
+      background-color var(--duree) var(--courbe);
+  }
+
+  .financement:hover {
+    transform: translateY(-3px);
+    border-color: var(--petrole);
+  }
+
+  .financement:has(.carte__lien:focus-visible) {
+    outline: 3px solid var(--petrole-fonce);
+    outline-offset: 3px;
+  }
+
+  .financement__icone {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    color: var(--petrole-fonce);
+  }
+
+  .financement__icone :global(svg) {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .financement__mention {
+    align-self: flex-start;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--ciel-voile);
+    color: var(--petrole-tres-fonce);
+    font-size: var(--taille-mini);
+    font-weight: 700;
+  }
+
+  .financement__titre {
+    font-size: 1.55rem;
+  }
+
+  .financement__titre a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .financement__resume {
+    color: var(--texte-doux);
+    font-size: 0.97rem;
+  }
+
+  .financement__lien {
+    margin-block-start: auto;
+    padding-block-start: var(--e-2);
+  }
+
+  /* Sur fond nuit */
+  .financements--nuit .financement {
+    border-color: var(--filet-nuit);
+    background: var(--nuit-2);
+    color: var(--sur-nuit);
+  }
+
+  .financements--nuit .financement:hover {
+    background: var(--nuit-3);
+    border-color: var(--petrole);
+  }
+
+  .financements--nuit .financement:has(.carte__lien:focus-visible) {
+    outline-color: var(--petrole-clair);
+  }
+
+  .financements--nuit .financement__icone {
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+  }
+
+  .financements--nuit .financement__mention {
+    background: rgb(124 198 220 / 0.14);
+    color: var(--petrole-clair);
+  }
+
+  .financements--nuit .financement__resume {
+    color: var(--sur-nuit-doux);
+  }
+
+  @media (min-width: 40rem) {
+    .financements {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .financements {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

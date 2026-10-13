@@ -1,0 +1,55 @@
+---
+import CartesFinancement from '../sections/CartesFinancement.astro'
+import EnteteSection from '../ui/EnteteSection.astro'
+import Icone from '../ui/Icone.astro'
+---
+
+<section class="section surface-nuit financer" aria-labelledby="titre-financer">
+  <div class="financer__decor" aria-hidden="true"></div>
+  <div class="conteneur">
+    <div class="financer__haut">
+      <EnteteSection etiquette="Financement" id="titre-financer">
+        <Fragment slot="titre">Financer son permis, <span class="accent">c’est possible</span></Fragment>
+        Découvrez les solutions qui peuvent faciliter votre projet. Chacune a ses conditions : nous vous aidons dans vos
+        démarches.
+      </EnteteSection>
+      <a class="bouton bouton--clair" href="/financement">
+        Découvrir les financements
+        <Icone nom="fleche" />
+      </a>
+    </div>
+    <CartesFinancement surNuit />
+  </div>
+</section>
+
+<style>
+  .financer {
+    overflow: hidden;
+    background:
+      radial-gradient(60% 70% at 100% 0%, rgb(57 139 164 / 0.25), transparent 70%),
+      var(--nuit);
+  }
+
+  .financer__decor {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: -4rem;
+    width: 14rem;
+    background: var(--petrole);
+    opacity: 0.08;
+    transform: skewX(var(--biais));
+  }
+
+  .financer__haut {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--e-5);
+    margin-block-end: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  }
+
+  .financer__haut :global(.entete-section) {
+    margin: 0;
+  }
+</style>

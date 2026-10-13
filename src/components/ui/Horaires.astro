@@ -1,0 +1,185 @@
+---
+import type { Horaires } from '../../data/etablissement.ts'
+import { heure, horairesEnTexte, joursFermes, libelleJours } from '../../lib/horaires.ts'
+
+/**
+ * Des horaires, à la manière du dépliant : « Lundi au vendredi : 10 h ▶ 12 h ».
+ * `etat` : affiche, avec JavaScript, « Ouvert en ce moment » ou « Fermé »
+ * (heure de Paris). Sans JavaScript, rien ne s’affiche à sa place.
+ */
+interface Props {
+  titre: string
+  horaires: Horaires
+  etat?: boolean
+  class?: string
+}
+
+const { titre, horaires, etat = false, class: classe } = Astro.props
+const fermes = joursFermes(horaires)
+---
+
+<div class:list={['horaires', classe]} data-horaires={etat ? JSON.stringify(horaires) : undefined}>
+  <p class="horaires__titre">
+    {titre}
+    {etat && <span class="horaires__etat" data-etat hidden />}
+  </p>
+  <p class="visuellement-masque">{horairesEnTexte(horaires)}{fermes.length > 0 && ` ; fermé le ${libelleJours(fermes).toLowerCase()}`}.</p>
+  <dl class="horaires__liste" aria-hidden="true">
+    {
+      horaires.map((h) => (
+        <div class="horaires__ligne">
+          <dt>{libelleJours(h.jours)}</dt>
+          <dd>
+            {h.plages.map(([d, f], i) => (
+              <span class="horaires__plage">
+                {i > 0 && <span class="horaires__et">&amp;</span>}
+                {heure(d)}
+                <span class="fleche-horaire" />
+                {heure(f)}
+              </span>
+            ))}
+          </dd>
+        </div>
+      ))
+    }
+    {
+      fermes.length > 0 && (
+        <div class="horaires__ligne horaires__ligne--ferme">
+          <dt>{libelleJours(fermes)}</dt>
+          <dd>Fermé</dd>
+        </div>
+      )
+    }
+  </dl>
+</div>
+
+<script>
+  type Plage = [string, string]
+  const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']
+
+  function maintenantAParis() {
+    const parties = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Paris',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date())
+    const val = (t: string) => parties.find((p) => p.type === t)?.value ?? ''
+    const jour = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(val('weekday'))
+    return { jour: jour === 0 ? 7 : jour, minutes: Number(val('hour')) * 60 + Number(val('minute')) }
+  }
+
+  const enMinutes = (h: string) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3, 5))
+  const enTexte = (h: string) => (h.endsWith(':00') ? `${Number(h.slice(0, 2))} h` : `${Number(h.slice(0, 2))} h ${h.slice(3)}`)
+
+  for (const bloc of document.querySelectorAll<HTMLElement>('[data-horaires]')) {
+    const horaires = JSON.parse(bloc.dataset.horaires ?? '[]') as Array<{ jours: number[]; plages: Plage[] }>
+    const etat = bloc.querySelector<HTMLElement>('[data-etat]')
+    if (!etat) continue
+    const plagesDu = (jour: number) => horaires.filter((h) => h.jours.includes(jour)).flatMap((h) => h.plages)
+    const { jour, minutes } = maintenantAParis()
+    const ouvert = plagesDu(jour).some(([d, f]) => minutes >= enMinutes(d) && minutes < enMinutes(f))
+    let texte = 'Ouvert en ce moment'
+    if (!ouvert) {
+      texte = 'Fermé en ce moment'
+      const prochaine = plagesDu(jour).find(([d]) => enMinutes(d) > minutes)
+      if (prochaine) texte = `Fermé · ouvre à ${enTexte(prochaine[0])}`
+      else {
+        for (let i = 1; i <= 7; i++) {
+          const j = ((jour - 1 + i) % 7) + 1
+          const premiere = plagesDu(j)[0]
+          if (premiere) {
+            texte = `Fermé · ouvre ${i === 1 ? 'demain' : JOURS[j % 7]} à ${enTexte(premiere[0])}`
+            break
+          }
+        }
+      }
+    }
+    etat.textContent = texte
+    etat.toggleAttribute('data-ouvert', ouvert)
+    etat.hidden = false
+  }
+</script>
+
+<style>
+  .horaires__titre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-2) var(--e-3);
+    margin-block-end: var(--e-3);
+    font-family: var(--police-titre);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .horaires__etat {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--gris);
+    color: var(--texte-doux);
+    font-family: var(--police-texte);
+    font-size: var(--taille-mini);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .horaires__etat[data-ouvert] {
+    background: var(--succes-voile);
+    color: var(--succes);
+  }
+
+  .horaires__liste {
+    display: grid;
+    gap: var(--e-2);
+    margin: 0;
+  }
+
+  .horaires__ligne {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.1rem var(--e-4);
+    padding-block-end: var(--e-2);
+    border-block-end: 1px dashed var(--filet);
+  }
+
+  .horaires__ligne dt {
+    font-weight: 600;
+  }
+
+  .horaires__ligne dd {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--e-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .horaires__et {
+    margin-inline-end: var(--e-2);
+    color: var(--texte-doux);
+  }
+
+  .horaires__ligne--ferme dd {
+    color: var(--texte-doux);
+  }
+
+  :global(.surface-nuit) .horaires__ligne {
+    border-block-end-color: var(--filet-nuit);
+  }
+
+  :global(.surface-nuit) .horaires__etat {
+    background: var(--nuit-3);
+    color: var(--sur-nuit);
+  }
+
+  :global(.surface-nuit) .horaires__ligne--ferme dd,
+  :global(.surface-nuit) .horaires__et {
+    color: var(--sur-nuit-doux);
+  }
+</style>

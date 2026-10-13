@@ -1,0 +1,109 @@
+---
+import { Image } from 'astro:assets'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+/**
+ * Le logo de l’établissement.
+ *
+ * Le logo officiel (`ETABLISSEMENT.logoFichier`), en version pour fond sombre
+ * ou clair. Sans fichier (démonstration), le nom est écrit en lettres, dans
+ * l’esprit du site : « VOTRE » en italique pétrole sur une ligne de route, et
+ * « AUTO-ÉCOLE » en capitales espacées. Aucun symbole n’est inventé.
+ *
+ * `id` : unique par page (dégradé SVG), `variante` : `sombre` sur fond nuit,
+ * `clair` sur fond blanc.
+ */
+interface Props {
+  id: string
+  variante?: 'sombre' | 'clair'
+  class?: string
+}
+
+const { id, variante = 'sombre', class: classe } = Astro.props
+const fichier = ETABLISSEMENT.logoFichier
+const tirets = Array.from({ length: 7 }, (_, i) => 190 + i * 14)
+---
+
+{
+  fichier ? (
+    <Image
+      src={variante === 'sombre' ? fichier.sombre : fichier.clair}
+      alt={ETABLISSEMENT.nom}
+      width={480}
+      class:list={['logo', 'logo--image', classe]}
+      loading="eager"
+    />
+  ) : (
+    <svg
+      class:list={['logo', `logo--${variante}`, classe]}
+      viewBox="0 0 300 94"
+      role="img"
+      aria-label={ETABLISSEMENT.nom}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id={`${id}-degrade`} x1="0" y1="0" x2="0" y2="1">
+          <stop class="logo__haut" offset="0" />
+          <stop class="logo__bas" offset="1" />
+        </linearGradient>
+      </defs>
+      <text class="logo__nom" x="150" y="56" text-anchor="middle" fill={`url(#${id}-degrade)`}>
+        VOTRE
+      </text>
+      <rect class="logo__trait" x="14" y="66" width="170" height="3.2" rx="1" />
+      {tirets.map((x) => (
+        <rect class="logo__trait" x={x} y="66" width="8" height="3.2" rx="1" />
+      ))}
+      <text class="logo__activite" x="153.5" y="90" text-anchor="middle">
+        AUTO-ÉCOLE
+      </text>
+    </svg>
+  )
+}
+
+<style>
+  .logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .logo__trait {
+    fill: var(--blanc);
+  }
+
+  .logo__haut {
+    stop-color: var(--logo-haut);
+  }
+
+  .logo__bas {
+    stop-color: var(--logo-bas);
+  }
+
+
+  .logo__nom {
+    font-family: var(--police-titre-italique);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 70px;
+    letter-spacing: 1px;
+    stroke: var(--blanc);
+    stroke-width: 1.4px;
+    paint-order: stroke fill;
+  }
+
+  .logo__activite {
+    font-family: var(--police-titre);
+    font-weight: 700;
+    font-size: 19.5px;
+    letter-spacing: 7px;
+    fill: var(--blanc);
+  }
+
+  .logo--clair .logo__trait,
+  .logo--clair .logo__activite {
+    fill: var(--nuit);
+  }
+
+</style>

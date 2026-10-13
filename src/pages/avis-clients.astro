@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import AvisGoogle from '../components/sections/AvisGoogle.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Icone from '../components/ui/Icone.astro'
+import { AVIS_D_EXEMPLE } from '../data/avis.ts'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { dateLongue, noteFr } from '../lib/format.ts'
+
+const e = ETABLISSEMENT
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Avis des élèves', href: '/avis-clients' },
+]
+const note = e.noteGoogle
+---
+
+<Base
+  titre="Avis des élèves de l’auto-école"
+  description={note
+    ? `Les avis des élèves de ${e.nom} : ${noteFr(note.note)}/5 sur ${note.nombreAvis} avis Google, des extraits d’avis et le lien vers tous les avis.`
+    : `Les avis des élèves de ${e.nom} sur Google : des extraits d’avis, et le lien vers tous les avis publiés sur notre fiche.`}
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Avis des élèves">
+    <Fragment slot="titre">Ce qu’en disent <span class="accent">nos élèves</span></Fragment>
+    {
+      note
+        ? `${noteFr(note.note)}/5 sur Google, d’après ${note.nombreAvis} avis (relevé le ${dateLongue(note.releveLe)}). Voici quelques extraits, et le lien vers tous les avis.`
+        : 'Voici quelques extraits d’avis publiés sur notre fiche Google, et le lien vers tous les avis.'
+    }
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href={e.google.fiche} target="_blank" rel="noopener">
+        Tous les avis sur Google <Icone nom="externe" />
+        <span class="visuellement-masque">(nouvel onglet)</span>
+      </a>
+    </Fragment>
+  </HerosPage>
+
+  <AvisGoogle etiquette={AVIS_D_EXEMPLE ? 'Exemples d’avis' : 'Extraits d’avis Google'} />
+
+  <section class="section section--gris" aria-labelledby="titre-laisser">
+    <div class="conteneur laisser">
+      <div>
+        <h2 id="titre-laisser" class="laisser__titre">Vous avez été élève chez nous ?</h2>
+        <p class="texte-doux">
+          Votre avis aide les futurs élèves à se décider. Vous pouvez le publier sur notre fiche Google.
+        </p>
+      </div>
+      <a class="bouton" href={e.google.fiche} target="_blank" rel="noopener">
+        Donner mon avis sur Google <Icone nom="externe" />
+        <span class="visuellement-masque">(nouvel onglet)</span>
+      </a>
+      <p class="laisser__mention texte-doux">
+        {
+          AVIS_D_EXEMPLE
+            ? 'Site de démonstration : les avis ci-dessus sont des exemples, et la note est une valeur d’exemple. Sur votre site, ce sont des citations de vos avis Google, sans aucun mot modifié, et la note relevée à une date indiquée.'
+            : 'Les extraits ci-dessus sont des citations d’avis Google : les coupures sont marquées « […] », aucun mot n’est modifié. La note est relevée à la date indiquée et peut avoir évolué depuis.'
+        }
+      </p>
+    </div>
+  </section>
+
+  <AppelFinal />
+</Base>
+
+<style>
+  .laisser {
+    display: grid;
+    gap: var(--e-5);
+    align-items: center;
+  }
+
+  .laisser__titre {
+    margin-block-end: var(--e-3);
+    font-size: clamp(1.8rem, 1.5rem + 1.2vw, 2.4rem);
+  }
+
+  .laisser__mention {
+    font-size: var(--taille-petit);
+  }
+
+  @media (min-width: 64rem) {
+    .laisser {
+      grid-template-columns: 1fr auto;
+    }
+
+    .laisser__mention {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

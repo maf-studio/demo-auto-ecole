@@ -1,0 +1,235 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+import Etoiles from '../ui/Etoiles.astro'
+import Icone from '../ui/Icone.astro'
+import { AVIS, AVIS_D_EXEMPLE } from '../../data/avis.ts'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { dateLongue, noteFr } from '../../lib/format.ts'
+
+/**
+ * La note Google et des avis réels. La note s’affiche toujours avec sa date
+ * de relevé ; les avis sont des citations, coupures marquées « […] ». Un avis
+ * d’exemple (démonstration) est annoncé comme tel sur sa carte.
+ */
+interface Props {
+  titreNiveau?: 1 | 2
+  etiquette?: string
+}
+
+const { etiquette = 'Avis des élèves' } = Astro.props
+const e = ETABLISSEMENT
+const note = e.noteGoogle
+---
+
+<section class="section avis" aria-labelledby="titre-avis">
+  <div class="conteneur">
+    <EnteteSection etiquette={etiquette} id="titre-avis">
+      <Fragment slot="titre">Ils nous font <span class="accent">confiance</span></Fragment>
+    </EnteteSection>
+
+    <div class="avis__grille">
+      {
+        note && (
+          <div class="avis__note surface-nuit" data-revele>
+            <p class="avis__source">
+              <span class="avis__google">Google</span> Avis des élèves
+            </p>
+            <p class="avis__chiffre">
+              {noteFr(note.note)}
+              <span>/5</span>
+            </p>
+            <Etoiles note={note.note} class="avis__etoiles" />
+            <p class="avis__nombre">
+              <strong>{note.nombreAvis} avis</strong>
+              <span class="texte-doux">relevé le {dateLongue(note.releveLe)}</span>
+            </p>
+            <a class="bouton bouton--clair bouton--petit" href={e.google.fiche} target="_blank" rel="noopener">
+              Consulter les avis Google
+              <Icone nom="externe" />
+              <span class="visuellement-masque">(nouvel onglet)</span>
+            </a>
+          </div>
+        )
+      }
+
+      <ul class="avis__liste" aria-label={AVIS_D_EXEMPLE ? 'Exemples d’avis' : 'Extraits d’avis Google'} tabindex="0">
+        {
+          AVIS.map((a, i) => (
+            <li class="avis__carte carte" data-revele style={`--rang: ${i + 1}`}>
+              <figure>
+                <span class="avis__guillemet" aria-hidden="true">
+                  «
+                </span>
+                <Etoiles note={a.note} />
+                <span class="visuellement-masque">Note : {a.note} sur 5.</span>
+                <blockquote>
+                  <p>{a.extrait}</p>
+                </blockquote>
+                <figcaption>
+                  <span class="avis__initiale" aria-hidden="true">
+                    {a.auteur.charAt(0)}
+                  </span>
+                  <span>
+                    <strong>{a.auteur}</strong>
+                    <span class="avis__origine">{a.source === 'Exemple' ? 'Avis d’exemple' : `Avis ${a.source}`}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .avis__grille {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  .avis__note {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--e-3);
+    padding: var(--e-6);
+    border-radius: var(--rayon-l);
+    background:
+      radial-gradient(90% 70% at 100% 0%, rgb(57 139 164 / 0.35), transparent 70%),
+      var(--nuit);
+  }
+
+  .avis__source {
+    font-size: var(--taille-petit);
+    color: var(--sur-nuit-doux);
+  }
+
+  .avis__google {
+    margin-inline-end: 0.35rem;
+    color: var(--sur-nuit);
+    font-weight: 800;
+  }
+
+  .avis__chiffre {
+    font-family: var(--police-titre);
+    font-size: clamp(4.5rem, 3.5rem + 4vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.9;
+  }
+
+  .avis__chiffre span {
+    font-size: 0.4em;
+    color: var(--sur-nuit-doux);
+  }
+
+  .avis__note :global(.avis__etoiles) {
+    font-size: 1.6rem;
+  }
+
+  .avis__nombre {
+    display: grid;
+    margin-block-end: var(--e-3);
+  }
+
+  .avis__nombre strong {
+    font-size: 1.15rem;
+  }
+
+  .avis__liste {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(17.5rem, 85%);
+    gap: var(--e-4);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block-end: var(--e-3);
+    margin-inline: calc(-1 * var(--gouttiere));
+    padding-inline: var(--gouttiere);
+    scroll-padding-inline: var(--gouttiere);
+  }
+
+  .avis__liste:focus-visible {
+    outline: 3px solid var(--petrole-fonce);
+    outline-offset: 2px;
+  }
+
+  .avis__carte {
+    scroll-snap-align: start;
+    padding: var(--e-6) var(--e-5) var(--e-5);
+  }
+
+  .avis__carte figure {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-4);
+    height: 100%;
+    margin: 0;
+  }
+
+  .avis__guillemet {
+    position: absolute;
+    inset-block-start: -1.4rem;
+    inset-inline-end: 0;
+    font-family: var(--police-titre);
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--ciel);
+  }
+
+  .avis__carte blockquote {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .avis__carte figcaption {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    margin-block-start: auto;
+    padding-block-start: var(--e-4);
+    border-block-start: 1px dashed var(--filet);
+  }
+
+  .avis__initiale {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .avis__carte strong {
+    display: block;
+    line-height: 1.2;
+  }
+
+  .avis__origine {
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+  }
+
+  @media (min-width: 64rem) {
+    .avis__grille {
+      grid-template-columns: 0.8fr 2.2fr;
+      align-items: stretch;
+    }
+
+    .avis__liste {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>

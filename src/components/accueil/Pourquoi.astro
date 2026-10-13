@@ -1,0 +1,133 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+import Icone, { type NomIcone } from '../ui/Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+const raisons: Array<{ icone: NomIcone; titre: string; texte: string }> = [
+  {
+    icone: 'calendrier',
+    titre: `L’expérience depuis ${ETABLISSEMENT.anneeCreation}`,
+    texte: 'Un établissement implanté depuis plus de quinze ans, au même endroit, au cœur du quartier.',
+  },
+  {
+    icone: 'volant',
+    titre: 'Des formations adaptées',
+    texte: 'Boîte manuelle ou automatique, conduite accompagnée, moto : un parcours selon votre âge, votre profil et vos objectifs.',
+  },
+  {
+    icone: 'tirelire',
+    titre: 'Des solutions de financement',
+    texte: 'Paiement en 3 fois sans frais, permis à 1 € par jour, CPF selon votre situation : nous étudions avec vous les possibilités.',
+  },
+  {
+    icone: 'horloge',
+    titre: 'Des horaires flexibles',
+    texte: 'Des créneaux de conduite du lundi au samedi, de 7 h à 20 h, pour avancer même avec un emploi du temps chargé.',
+  },
+]
+---
+
+<section class="section pourquoi" aria-labelledby="titre-pourquoi">
+  <div class="conteneur">
+    <EnteteSection etiquette="Pourquoi nous choisir" id="titre-pourquoi">
+      <Fragment slot="titre">Bien plus qu’une <span class="accent">auto-école</span></Fragment>
+    </EnteteSection>
+
+    <ol class="pourquoi__liste">
+      {
+        raisons.map((r, i) => (
+          <li class="pourquoi__item" data-revele style={`--rang: ${i}`}>
+            <span class="pourquoi__numero" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span class="pourquoi__icone">
+              <Icone nom={r.icone} />
+            </span>
+            <h3 class="pourquoi__titre">{r.titre}</h3>
+            <p class="pourquoi__texte">{r.texte}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .pourquoi__liste {
+    display: grid;
+    gap: var(--e-5);
+    list-style: none;
+    counter-reset: none;
+  }
+
+  .pourquoi__item {
+    position: relative;
+    padding: var(--e-6) var(--e-5) var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--gris);
+    overflow: hidden;
+  }
+
+  .pourquoi__item::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 4px;
+    background-image: repeating-linear-gradient(90deg, var(--petrole) 0 18px, transparent 18px 30px);
+  }
+
+  .pourquoi__numero {
+    position: absolute;
+    inset-block-start: 0.6rem;
+    inset-inline-end: 1rem;
+    font-family: var(--police-titre-italique);
+    font-style: italic;
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--petrole);
+    opacity: 0.6;
+  }
+
+  .pourquoi__icone {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-block-end: var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--nuit);
+    color: var(--petrole-clair);
+    transform: skewX(var(--biais));
+  }
+
+  .pourquoi__icone :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: skewX(10deg);
+  }
+
+  .pourquoi__titre {
+    margin-block-end: var(--e-3);
+    font-size: 1.55rem;
+  }
+
+  .pourquoi__texte {
+    color: var(--texte-doux);
+    font-size: 0.97rem;
+  }
+
+  @media (min-width: 40rem) {
+    .pourquoi__liste {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .pourquoi__liste {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import Etiquette from './Etiquette.astro'
+
+/**
+ * L’en-tête d’une section : étiquette, titre (avec au plus un mot `accent`,
+ * passé dans le slot `titre`), chapô facultatif.
+ */
+interface Props {
+  etiquette?: string
+  niveau?: 2 | 3
+  centre?: boolean
+  id?: string
+  class?: string
+}
+
+const { etiquette, niveau = 2, centre = false, id, class: classe } = Astro.props
+const Balise = `h${niveau}` as const
+---
+
+<div class:list={['entete-section', { 'entete-section--centre': centre }, classe]}>
+  {etiquette && <Etiquette>{etiquette}</Etiquette>}
+  <Balise id={id} class="entete-section__titre"><slot name="titre" /></Balise>
+  {Astro.slots.has('default') && <p class="chapo entete-section__chapo"><slot /></p>}
+</div>
+
+<style>
+  .entete-section {
+    max-width: 50rem;
+    margin-block-end: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  }
+
+  .entete-section--centre {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .entete-section--centre .entete-section__chapo {
+    margin-inline: auto;
+  }
+
+  .entete-section__chapo {
+    margin-block-start: var(--e-4);
+  }
+</style>

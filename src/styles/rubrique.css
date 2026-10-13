@@ -1,0 +1,103 @@
+/* Les pages de rubrique (/permis-auto, /permis-moto) : visuel, grille, autres formules. */
+.hub-visuel {
+    overflow: hidden;
+    border-radius: var(--rayon-l);
+    clip-path: polygon(7% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .hub-visuel img,
+  .hub-visuel .visuel {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .hub-grille {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  .hub-autres {
+    display: grid;
+    gap: var(--e-4);
+    margin-block-start: var(--e-7);
+  }
+
+  .hub-autre {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: var(--e-2) var(--e-4);
+    align-items: center;
+    padding: var(--e-5);
+    border: 2px dashed var(--filet);
+    border-radius: var(--rayon);
+  }
+
+  .hub-autre > svg {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    color: var(--petrole-fonce);
+  }
+
+  .hub-autre h3 {
+    font-size: 1.4rem;
+  }
+
+  .hub-autre p {
+    color: var(--texte-doux);
+  }
+
+  .hub-autre .lien-fleche {
+    grid-column: 2;
+  }
+
+  @media (min-width: 40rem) {
+    .hub-grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hub-autre {
+      grid-template-columns: 2.75rem 1fr auto;
+    }
+
+    .hub-autre .lien-fleche {
+      grid-column: 3;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hub-grille {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .hub-autres {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+.hub-note {
+  display: flex;
+  gap: var(--e-3);
+  max-width: var(--largeur-texte);
+  margin-block-start: var(--e-6);
+  padding: var(--e-4) var(--e-5);
+  border-radius: var(--rayon);
+  background: var(--ciel-voile);
+  font-size: var(--taille-petit);
+}
+
+.hub-note svg {
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  color: var(--petrole-fonce);
+}
+
+@media (min-width: 64rem) {
+  .hub-grille--5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

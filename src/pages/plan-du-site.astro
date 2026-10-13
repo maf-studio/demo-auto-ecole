@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import { formationsDe } from '../data/formations.ts'
+
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Plan du site', href: '/plan-du-site' },
+]
+const groupes = [
+  {
+    titre: 'Formations',
+    liens: [
+      { libelle: 'Code de la route', href: '/code-de-la-route' },
+      { libelle: 'Permis auto', href: '/permis-auto' },
+      ...formationsDe('auto').map((f) => ({ libelle: f.nom, href: `/${f.slug}` })),
+      { libelle: 'Permis moto', href: '/permis-moto' },
+      ...formationsDe('moto').map((f) => ({ libelle: f.nom, href: `/${f.slug}` })),
+    ],
+  },
+  {
+    titre: 'Infos pratiques',
+    liens: [
+      { libelle: 'Financement', href: '/financement' },
+      { libelle: 'Tarifs et devis', href: '/tarifs' },
+      { libelle: 'Documents d’inscription', href: '/documents-inscription' },
+    ],
+  },
+  {
+    titre: 'L’auto-école',
+    liens: [
+      { libelle: 'Accueil', href: '/' },
+      { libelle: 'À propos', href: '/a-propos' },
+      { libelle: 'Avis des élèves', href: '/avis-clients' },
+      { libelle: 'Démarche qualité', href: '/demarche-qualite' },
+      { libelle: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    titre: 'Informations légales',
+    liens: [
+      { libelle: 'Mentions légales', href: '/mentions-legales' },
+      { libelle: 'Politique de confidentialité', href: '/confidentialite' },
+      { libelle: 'Cookies et préférences', href: '/cookies' },
+    ],
+  },
+]
+---
+
+<Base
+  titre="Plan du site"
+  description="Le plan du site de Votre Auto-École : formations auto et moto, code de la route, financement, tarifs, documents et contact."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane}>
+    <Fragment slot="titre">Plan du site</Fragment>
+  </HerosPage>
+  <div class="section section--serree">
+    <div class="conteneur plan">
+      {
+        groupes.map((g) => (
+          <section aria-labelledby={`plan-${g.titre}`}>
+            <h2 id={`plan-${g.titre}`}>{g.titre}</h2>
+            <ul>
+              {g.liens.map((l) => (
+                <li>
+                  <a href={l.href}>{l.libelle}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .plan {
+    display: grid;
+    gap: var(--e-7);
+  }
+
+  .plan h2 {
+    margin-block-end: var(--e-4);
+    font-size: 1.6rem;
+  }
+
+  .plan ul {
+    display: grid;
+    gap: var(--e-2);
+    padding-inline-start: 1.1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .plan {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .plan {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

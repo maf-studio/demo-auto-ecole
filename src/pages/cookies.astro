@@ -1,0 +1,83 @@
+---
+import Legal from '../layouts/Legal.astro'
+---
+
+<Legal
+  titre="Cookies et préférences"
+  chemin="/cookies"
+  description="Les cookies et préférences du site de Votre Auto-École : aucun suivi, une carte Google chargée seulement avec votre accord, et comment le retirer."
+>
+  <h2>Aucun cookie de suivi</h2>
+  <p>
+    Ce site ne mesure pas son audience et n’affiche aucune publicité : il ne dépose aucun cookie de suivi, et n’a donc
+    pas besoin de bandeau de consentement à chaque visite.
+  </p>
+
+  <h2>La carte Google Maps</h2>
+  <p>
+    La carte de nos pages est un service de Google, qui peut déposer ses propres cookies et reçoit votre adresse IP. Elle
+    ne se charge donc que si vous cliquez sur « Afficher la carte ». Votre accord est retenu dans ce navigateur, pour ne
+    pas vous le redemander.
+  </p>
+  <p class="etat" data-etat-carte>Statut : la carte n’est pas autorisée dans ce navigateur.</p>
+  <button class="bouton bouton--contour bouton--petit" type="button" data-retirer-carte hidden>Retirer mon accord pour la carte</button>
+
+  <h2>La liste des documents</h2>
+  <p>
+    Sur la page « Documents d’inscription », les cases cochées et la formation choisie sont enregistrées dans votre
+    navigateur, pour retrouver votre liste plus tard. Elles ne sont jamais envoyées.
+  </p>
+  <button class="bouton bouton--contour bouton--petit" type="button" data-effacer-liste hidden>Effacer ma liste de documents</button>
+  <p class="etat" data-etat-liste role="status" aria-live="polite"></p>
+</Legal>
+
+<script>
+  const lire = (cle: string) => {
+    try {
+      return localStorage.getItem(cle)
+    } catch {
+      return null
+    }
+  }
+  const effacer = (cle: string) => {
+    try {
+      localStorage.removeItem(cle)
+    } catch {
+      /* Stockage indisponible : rien à effacer. */
+    }
+  }
+
+  const etatCarte = document.querySelector<HTMLElement>('[data-etat-carte]')
+  const boutonCarte = document.querySelector<HTMLButtonElement>('[data-retirer-carte]')
+  const majCarte = () => {
+    const autorisee = lire('auto-ecole-carte') === 'oui'
+    if (etatCarte)
+      etatCarte.textContent = autorisee
+        ? 'Statut : la carte est autorisée dans ce navigateur.'
+        : 'Statut : la carte n’est pas autorisée dans ce navigateur.'
+    if (boutonCarte) boutonCarte.hidden = !autorisee
+  }
+  boutonCarte?.addEventListener('click', () => {
+    effacer('auto-ecole-carte')
+    majCarte()
+    etatCarte?.focus()
+  })
+  majCarte()
+
+  const boutonListe = document.querySelector<HTMLButtonElement>('[data-effacer-liste]')
+  const etatListe = document.querySelector<HTMLElement>('[data-etat-liste]')
+  if (boutonListe) {
+    boutonListe.hidden = false
+    boutonListe.addEventListener('click', () => {
+      effacer('auto-ecole-documents')
+      if (etatListe) etatListe.textContent = 'Votre liste de documents a été effacée de ce navigateur.'
+    })
+  }
+</script>
+
+<style>
+  .etat {
+    margin-block: var(--e-3);
+    font-weight: 700;
+  }
+</style>

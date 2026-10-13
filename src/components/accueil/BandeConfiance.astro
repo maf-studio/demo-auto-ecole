@@ -1,0 +1,127 @@
+---
+import Icone, { type NomIcone } from '../ui/Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+import { noteFr } from '../../lib/format.ts'
+
+const e = ETABLISSEMENT
+const arguments_: Array<{ icone: NomIcone; titre: string; detail: string }> = [
+  { icone: 'calendrier', titre: `Depuis ${e.anneeCreation}`, detail: `à ${e.adresse.ville}` },
+  { icone: 'volant', titre: 'Auto & moto', detail: 'du code au permis A' },
+  ...(e.noteGoogle
+    ? [
+        {
+          icone: 'etoile' as const,
+          titre: `${noteFr(e.noteGoogle.note)}/5 sur Google`,
+          detail: `${e.noteGoogle.nombreAvis} avis`,
+        },
+      ]
+    : []),
+  { icone: 'carte', titre: 'Paiement en 3 fois', detail: 'sans frais' },
+]
+---
+
+<section class="confiance" aria-label="Nos engagements en bref">
+  <div class="conteneur">
+    <ul class="confiance__liste">
+      {
+        arguments_.map((a) => (
+          <li class="confiance__item">
+            <span class="confiance__icone">
+              <Icone nom={a.icone} />
+            </span>
+            <span>
+              <strong>{a.titre}</strong>
+              <span class="confiance__detail">{a.detail}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .confiance {
+    position: relative;
+    z-index: 2;
+    margin-block-start: -3.25rem;
+  }
+
+  .confiance__liste {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    list-style: none;
+    background: var(--blanc);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre-forte);
+    overflow: hidden;
+  }
+
+  .confiance__item {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    padding: var(--e-4);
+    line-height: 1.25;
+  }
+
+  .confiance__item:nth-child(odd) {
+    border-inline-end: 1px solid var(--filet);
+  }
+
+  .confiance__item:nth-child(-n + 2) {
+    border-block-end: 1px solid var(--filet);
+  }
+
+  .confiance__icone {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    color: var(--petrole-fonce);
+  }
+
+  .confiance__icone :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .confiance__item strong {
+    display: block;
+    font-family: var(--police-titre);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .confiance__detail {
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+  }
+
+  @media (min-width: 64rem) {
+    .confiance__liste {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .confiance__item {
+      padding: var(--e-5) var(--e-6);
+    }
+
+    .confiance__item:nth-child(-n + 2) {
+      border-block-end: 0;
+    }
+
+    .confiance__item:not(:last-child) {
+      border-inline-end: 1px solid var(--filet);
+    }
+
+    .confiance__item strong {
+      font-size: 1.35rem;
+    }
+  }
+</style>

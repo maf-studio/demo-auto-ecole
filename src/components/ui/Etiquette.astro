@@ -1,0 +1,39 @@
+---
+/**
+ * L’étiquette de section, comme les bandeaux du dépliant : un parallélogramme
+ * pétrole, texte blanc en capitales. Une par section au plus.
+ */
+interface Props {
+  class?: string
+}
+const { class: classe } = Astro.props
+---
+
+<p class:list={['etiquette', classe]}><span><slot /></span></p>
+
+<style>
+  .etiquette {
+    position: relative;
+    isolation: isolate;
+    display: inline-block;
+    margin: 0 0 var(--e-5) 0.35rem;
+    padding: 0.32rem 0.95rem 0.28rem;
+    color: var(--blanc);
+    font-family: var(--police-titre);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .etiquette::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--petrole-fonce);
+    transform: skewX(var(--biais));
+    border-radius: 3px;
+  }
+</style>

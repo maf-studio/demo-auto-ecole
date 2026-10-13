@@ -1,0 +1,35 @@
+{
+  "name": "site-auto-ecole-demo",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "dev:essai": "EMAIL_PROVIDER=essai CONTACT_TO=ecole@exemple.invalid CONTACT_FROM=site@exemple.invalid FORM_SECRET=essai-uniquement-jamais-en-ligne-0123456789 astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check:publication": "node --experimental-strip-types scripts/check-publication.ts",
+    "check:liens": "node --experimental-strip-types scripts/check-liens.ts",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vercel": "^11.0.10",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@fontsource/kaushan-script": "^5.3.0",
+    "astro": "^7.3.2",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,153 @@
+---
+import type { Visuel } from '../../data/formations.ts'
+import Icone, { type NomIcone } from './Icone.astro'
+
+/**
+ * Le visuel d’une formation sans photographie : une route en perspective et
+ * un panneau rond, dans les couleurs de la marque. Purement décoratif
+ * (`aria-hidden`) et clairement remplaçable : dès qu’une vraie photo existe,
+ * elle prend sa place (voir `CarteFormation`).
+ */
+interface Props {
+  motif: Visuel
+  class?: string
+}
+
+const { motif, class: classe } = Astro.props
+
+const ICONE: Record<Visuel, NomIcone | null> = {
+  panneau: null,
+  voiture: 'voiture',
+  automatique: null,
+  duo: 'utilisateurs',
+  manuelle: 'vitesses',
+  moto: 'moto',
+  scooter: 'moto',
+}
+const icone = ICONE[motif]
+---
+
+<div class:list={['visuel', classe]} aria-hidden="true">
+  <svg class="visuel__route" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
+    <path class="visuel__chaussee" d="M150 120h100l150 180H0z"></path>
+    <path class="visuel__bord" d="M150 120 0 300M250 120l150 180"></path>
+    <path class="visuel__axe" d="M200 128v172"></path>
+  </svg>
+  <span class="visuel__bande"></span>
+  <span class="visuel__panneau">
+    {
+      motif === 'panneau' ? (
+        <svg viewBox="0 0 24 24" class="visuel__triangle">
+          <path d="M12 3 22 20H2Z" />
+          <path d="M12 9.5v5M12 17.2v.3" />
+        </svg>
+      ) : motif === 'automatique' ? (
+        <span class="visuel__lettres">
+          <span>P</span>
+          <span>R</span>
+          <span>N</span>
+          <span class="visuel__lettre-active">D</span>
+        </span>
+      ) : (
+        icone && <Icone nom={icone} />
+      )
+    }
+  </span>
+</div>
+
+<style>
+  .visuel {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 80% 0%, rgb(57 139 164 / 0.45), transparent 60%),
+      var(--nuit);
+    isolation: isolate;
+  }
+
+  .visuel__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .visuel__chaussee {
+    fill: var(--nuit-2);
+  }
+
+  .visuel__bord {
+    stroke: rgb(255 255 255 / 0.35);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .visuel__axe {
+    stroke: var(--blanc);
+    stroke-width: 4;
+    stroke-dasharray: 16 14;
+    fill: none;
+    opacity: 0.85;
+  }
+
+  .visuel__bande {
+    position: absolute;
+    inset-block: -20%;
+    inset-inline-end: 12%;
+    width: 18%;
+    background: var(--petrole);
+    opacity: 0.25;
+    transform: skewX(var(--biais));
+  }
+
+  .visuel__panneau {
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 14%;
+    display: grid;
+    place-items: center;
+    width: 40%;
+    aspect-ratio: 1;
+    max-width: 9rem;
+    border: clamp(5px, 1.4vw, 9px) solid var(--petrole);
+    border-radius: 50%;
+    background: var(--blanc);
+    color: var(--nuit);
+    box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.6);
+    transform: translateX(-50%);
+    transition: transform var(--duree-longue) var(--courbe);
+  }
+
+  .visuel__panneau :global(svg) {
+    width: 52%;
+    height: 52%;
+    stroke-width: 1.8;
+  }
+
+  .visuel__triangle path:first-child {
+    fill: none;
+    stroke: var(--erreur);
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+  }
+
+  .visuel__triangle path:last-child {
+    fill: none;
+    stroke: var(--nuit);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .visuel__lettres {
+    display: flex;
+    gap: 0.1em;
+    font-family: var(--police-titre);
+    font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+    font-weight: 800;
+    color: var(--texte-doux);
+  }
+
+  .visuel__lettre-active {
+    color: var(--petrole-fonce);
+  }
+</style>

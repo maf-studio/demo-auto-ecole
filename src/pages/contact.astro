@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro'
+import FormulaireDemande from '../components/formulaire/FormulaireDemande.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Localisation from '../components/sections/Localisation.astro'
+import Horaires from '../components/ui/Horaires.astro'
+import Icone from '../components/ui/Icone.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+
+const e = ETABLISSEMENT
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Contact', href: '/contact' },
+]
+---
+
+<Base
+  titre="Contact et devis : auto-école"
+  description={`Contactez ${ETABLISSEMENT.nom} : demande de devis en ligne, téléphone ${ETABLISSEMENT.telephone.affiche}, e-mail, adresse et horaires du bureau et de la conduite.`}
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Contact">
+    <Fragment slot="titre">Parlons de <span class="accent">votre permis</span></Fragment>
+    Une question, un devis, une inscription ? Appelez-nous, écrivez-nous, ou passez au bureau, {e.adresse.rue}.
+    <ul slot="bas" class="contacts-rapides">
+      <li>
+        <a href={e.telephone.lien}>
+          <Icone nom="telephone" />
+          <span><strong>Appeler</strong>{e.telephone.affiche}</span>
+        </a>
+      </li>
+      <li>
+        <a href={`mailto:${e.email}`}>
+          <Icone nom="email" />
+          <span><strong>Écrire</strong>{e.email}</span>
+        </a>
+      </li>
+      <li>
+        <a href={e.google.itineraire} target="_blank" rel="noopener">
+          <Icone nom="itineraire" />
+          <span><strong>Venir</strong>{e.adresse.rue}<span class="visuellement-masque"> (itinéraire, nouvel onglet)</span></span>
+        </a>
+      </li>
+      {
+        e.whatsapp && (
+          <li>
+            <a href={`https://wa.me/${e.whatsapp}`} target="_blank" rel="noopener">
+              <Icone nom="message" />
+              <span>
+                <strong>WhatsApp</strong>Nous écrire<span class="visuellement-masque"> (nouvel onglet)</span>
+              </span>
+            </a>
+          </li>
+        )
+      }
+    </ul>
+  </HerosPage>
+
+  <section id="demande" class="section" aria-labelledby="titre-demande">
+    <div class="conteneur contact">
+      <div class="contact__formulaire carte">
+        <h2 id="titre-demande" class="contact__titre">Demander un devis <span class="accent">ou un renseignement</span></h2>
+        <FormulaireDemande id="demande-contact" variante="complet" />
+      </div>
+      <aside class="contact__infos" aria-label="Horaires">
+        <div class="carte contact__bloc">
+          <Horaires titre="Bureau" horaires={e.horairesBureau} etat />
+        </div>
+        <div class="carte contact__bloc">
+          <Horaires titre="Conduite" horaires={e.horairesConduite} />
+          <p class="texte-doux contact__note">Les leçons se réservent avec le bureau, selon les créneaux disponibles.</p>
+        </div>
+        <div class="carte contact__bloc contact__agrement">
+          <p><strong>{e.nom}</strong></p>
+          <p class="texte-doux">Agrément préfectoral n° {e.agrement}</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <Localisation sansEntete id="titre-carte" />
+</Base>
+
+<style>
+  .contacts-rapides {
+    display: grid;
+    gap: var(--e-3);
+    margin-block-start: var(--e-7);
+    list-style: none;
+  }
+
+  .contacts-rapides a {
+    display: flex;
+    align-items: center;
+    gap: var(--e-4);
+    min-height: 4.5rem;
+    padding: var(--e-4) var(--e-5);
+    border: 1px solid var(--filet-nuit);
+    border-radius: var(--rayon);
+    background: var(--nuit-2);
+    color: var(--sur-nuit);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: background-color var(--duree) var(--courbe);
+  }
+
+  .contacts-rapides a:hover {
+    background: var(--nuit-3);
+  }
+
+  .contacts-rapides :global(svg) {
+    flex: none;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--petrole-fonce);
+    color: var(--blanc);
+  }
+
+  .contacts-rapides strong {
+    display: block;
+    font-family: var(--police-titre);
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .contact {
+    display: grid;
+    gap: var(--e-5);
+    align-items: start;
+  }
+
+  .contact__formulaire {
+    padding: clamp(1.25rem, 1rem + 2.5vw, 3rem);
+  }
+
+  .contact__titre {
+    margin-block-end: var(--e-5);
+    font-size: clamp(1.8rem, 1.4rem + 1.6vw, 2.6rem);
+  }
+
+  .contact__infos {
+    display: grid;
+    gap: var(--e-4);
+  }
+
+  .contact__bloc {
+    padding: var(--e-5);
+    box-shadow: none;
+  }
+
+  .contact__note {
+    margin-block-start: var(--e-3);
+    font-size: var(--taille-petit);
+  }
+
+  .contact__agrement p + p {
+    margin-block-start: var(--e-1);
+    font-size: var(--taille-petit);
+  }
+
+  @media (min-width: 40rem) {
+    .contacts-rapides {
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .contact {
+      grid-template-columns: 1.6fr 1fr;
+      gap: var(--e-6);
+    }
+
+    .contact__infos {
+      position: sticky;
+      inset-block-start: calc(var(--entete) + 1.5rem);
+    }
+  }
+</style>

@@ -1,0 +1,86 @@
+---
+import Legal from '../layouts/Legal.astro'
+import ACompleter from '../components/ui/ACompleter.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+
+const e = ETABLISSEMENT
+const l = e.legal
+---
+
+<Legal
+  titre="Mentions légales"
+  chemin="/mentions-legales"
+  description="Mentions légales du site de Votre Auto-École, auto-école et moto-école : éditeur, agrément, hébergeur, propriété intellectuelle."
+>
+  <h2>Éditeur du site</h2>
+  <dl>
+    <div><dt>Nom commercial</dt><dd>{e.nom}</dd></div>
+    <div><dt>Raison sociale</dt><dd><ACompleter valeur={l.raisonSociale} libelle="raison sociale" /></dd></div>
+    <div><dt>Forme juridique</dt><dd><ACompleter valeur={l.formeJuridique} libelle="forme juridique" /></dd></div>
+    <div><dt>Capital social</dt><dd><ACompleter valeur={l.capital} libelle="capital social (si société)" /></dd></div>
+    <div><dt>Siège social</dt><dd>{l.siegeSocial ?? `${e.adresse.rue}, ${e.adresse.codePostal} ${e.adresse.ville}`}</dd></div>
+    <div><dt>SIREN</dt><dd><ACompleter valeur={l.siren} libelle="numéro SIREN" /></dd></div>
+    <div><dt>SIRET</dt><dd><ACompleter valeur={l.siret} libelle="numéro SIRET" /></dd></div>
+    <div><dt>Immatriculation</dt><dd><ACompleter valeur={l.rcs} libelle="RCS ou RM et ville" /></dd></div>
+    <div><dt>TVA intracommunautaire</dt><dd><ACompleter valeur={l.tva} libelle="numéro de TVA (le cas échéant)" /></dd></div>
+    <div><dt>Agrément préfectoral</dt><dd>{e.agrement}</dd></div>
+    <div><dt>Téléphone</dt><dd><a href={e.telephone.lien}>{e.telephone.affiche}</a></dd></div>
+    <div><dt>E-mail</dt><dd><a href={`mailto:${e.email}`}>{e.email}</a></dd></div>
+    <div><dt>Directeur de la publication</dt><dd><ACompleter valeur={l.directeurPublication} libelle="nom du directeur de la publication" /></dd></div>
+  </dl>
+
+  <h2>Hébergement</h2>
+  <p>
+    {l.hebergeur.nom}, {l.hebergeur.adresse}. <a href={l.hebergeur.site} target="_blank" rel="noopener">{l.hebergeur.site.replace('https://', '')}</a>
+  </p>
+
+  {
+    l.realisation && (
+      <>
+        <h2>Conception et réalisation</h2>
+        <p>
+          <a href={l.realisation.site} target="_blank" rel="noopener">
+            {l.realisation.nom}
+          </a>
+        </p>
+      </>
+    )
+  }
+
+  {
+    /* Le paragraphe n’apparaît qu’avec un médiateur réel ; tant qu’il manque,
+       pnpm check:publication le signale comme bloquant. */
+    l.mediateur && (
+      <>
+        <h2>Médiation de la consommation</h2>
+        <p>
+          En cas de litige, et après une réclamation écrite restée sans réponse satisfaisante, le consommateur peut
+          recourir gratuitement au médiateur de la consommation dont relève l’établissement :{' '}
+          <a href={l.mediateur.site} target="_blank" rel="noopener">
+            {l.mediateur.nom}
+          </a>
+          .
+        </p>
+      </>
+    )
+  }
+
+  <h2>Propriété intellectuelle</h2>
+  <p>
+    Les textes, photographies, visuels et le logo de ce site appartiennent à l’{e.nom} ou sont utilisés avec son accord.
+    Toute reproduction sans autorisation est interdite. Les avis cités sont des extraits d’avis publics publiés sur la
+    fiche Google de l’établissement, reproduits sans modification.
+  </p>
+
+  <h2>Informations réglementaires</h2>
+  <p>
+    Les règles citées (âges, durées minimales de formation, financements) proviennent de sources officielles, indiquées
+    en bas de chaque page formation. Elles peuvent évoluer : en cas de doute, la source officielle fait foi.
+  </p>
+
+  <h2>Crédits</h2>
+  <p>
+    Polices Barlow Condensed, Manrope et Kaushan Script (licence SIL Open Font License). Pictogrammes dessinés d’après
+    les icônes Lucide (licence ISC).
+  </p>
+</Legal>

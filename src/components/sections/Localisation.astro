@@ -1,0 +1,170 @@
+---
+import CarteGoogle from '../ui/CarteGoogle.astro'
+import EnteteSection from '../ui/EnteteSection.astro'
+import Horaires from '../ui/Horaires.astro'
+import Icone from '../ui/Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+interface Props {
+  /** Masquer l’en-tête (sur /contact, la page a déjà son titre). */
+  sansEntete?: boolean
+  id?: string
+}
+
+const { sansEntete = false, id = 'titre-localisation' } = Astro.props
+const e = ETABLISSEMENT
+---
+
+<section class="section localisation" aria-labelledby={id}>
+  <div class="conteneur">
+    {
+      sansEntete ? (
+        <h2 id={id} class="visuellement-masque">
+          Nous trouver
+        </h2>
+      ) : (
+        <EnteteSection etiquette="Nous trouver" id={id}>
+          <Fragment slot="titre">
+            Rendez-vous <span class="accent">à l’auto-école</span>
+          </Fragment>
+          Au {e.adresse.rue}, à {e.adresse.ville} : l’accueil, les inscriptions et le départ des leçons.
+        </EnteteSection>
+      )
+    }
+
+    <div class="localisation__grille">
+      <div class="localisation__infos carte">
+        <ul class="localisation__coordonnees">
+          <li>
+            <Icone nom="adresse" />
+            <span>
+              <strong>Adresse</strong>
+              {e.adresse.rue}, {e.adresse.codePostal} {e.adresse.ville}
+            </span>
+          </li>
+          <li>
+            <Icone nom="telephone" />
+            <span>
+              <strong>Téléphone</strong>
+              <a href={e.telephone.lien}>{e.telephone.affiche}</a>
+            </span>
+          </li>
+          <li>
+            <Icone nom="email" />
+            <span>
+              <strong>E-mail</strong>
+              <a href={`mailto:${e.email}`}>{e.email}</a>
+            </span>
+          </li>
+        </ul>
+
+        <div class="localisation__horaires">
+          <Horaires titre="Bureau" horaires={e.horairesBureau} etat />
+          <Horaires titre="Conduite" horaires={e.horairesConduite} />
+        </div>
+
+        <div class="boutons">
+          <a class="bouton" href={e.google.itineraire} target="_blank" rel="noopener">
+            <Icone nom="itineraire" />
+            Obtenir un itinéraire
+            <span class="visuellement-masque">(Google Maps, nouvel onglet)</span>
+          </a>
+          <a class="bouton bouton--contour" href={e.telephone.lien}>
+            <Icone nom="telephone" />
+            Appeler
+          </a>
+        </div>
+      </div>
+
+      <div class="localisation__carte">
+        <CarteGoogle />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .localisation__grille {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  .localisation__infos {
+    display: grid;
+    gap: var(--e-6);
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+
+  .localisation__coordonnees {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .localisation__coordonnees li {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    gap: var(--e-4);
+    align-items: center;
+  }
+
+  .localisation__coordonnees :global(svg) {
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    color: var(--petrole-fonce);
+  }
+
+  .localisation__coordonnees strong {
+    display: block;
+    font-family: var(--police-titre);
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .localisation__coordonnees a {
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .localisation__horaires {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  .localisation__carte {
+    position: relative;
+    min-height: 24rem;
+  }
+
+  .localisation__carte :global(.carte-google) {
+    min-height: 24rem;
+  }
+
+  @media (min-width: 40rem) {
+    .localisation__horaires {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .localisation__grille {
+      grid-template-columns: 1fr 1.1fr;
+    }
+
+    .localisation__horaires {
+      grid-template-columns: 1fr;
+    }
+
+  }
+
+  @media (min-width: 80rem) {
+    .localisation__horaires {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

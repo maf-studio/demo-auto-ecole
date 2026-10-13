@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import Comparatif from '../components/sections/Comparatif.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import Questions from '../components/sections/Questions.astro'
+import CarteFormation from '../components/ui/CarteFormation.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import Visuel from '../components/ui/Visuel.astro'
+import '../styles/rubrique.css'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { AUTRES_FORMULES_AUTO, formationsDe } from '../data/formations.ts'
+import type { Question } from '../data/faq.ts'
+
+const formations = formationsDe('auto')
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Permis auto', href: '/permis-auto' },
+]
+const publiee = (slug: string) => formations.some((f) => f.slug === slug)
+
+const lignes = [
+  { slug: 'permis-b', intitule: 'Permis B boîte manuelle', valeurs: ['Examen dès 17 ans', '20 heures de conduite', 'Code, puis épreuve pratique', '3 ans'] },
+  { slug: 'permis-automatique', intitule: 'Permis B boîte automatique', valeurs: ['Examen dès 17 ans', '13 heures de conduite', 'Code, puis épreuve pratique', '3 ans'] },
+  { slug: 'conduite-accompagnee', intitule: 'Conduite accompagnée (AAC)', valeurs: ['Dès 15 ans, examen dès 17 ans', '20 h (13 h en automatique), puis 1 an et 3 000 km', 'Code, puis épreuve pratique', '2 ans'] },
+  { slug: 'conduite-supervisee', intitule: 'Conduite supervisée', valeurs: ['Dès 18 ans', 'Formation initiale, puis conduite avec un accompagnateur', 'Code, puis épreuve pratique', '3 ans'] },
+  { slug: 'passerelle-boite-manuelle', intitule: 'Passerelle boîte manuelle', valeurs: ['Titulaires du permis B automatique', '7 heures', 'Aucun', 'Inchangée'] },
+]
+  .filter((l) => publiee(l.slug))
+  .map((l) => ({ intitule: l.intitule, href: `/${l.slug}`, valeurs: l.valeurs }))
+
+const questions: Question[] = [
+  {
+    question: 'Boîte manuelle ou automatique : que choisir ?',
+    reponse:
+      'La boîte automatique demande moins d’heures au minimum (13 au lieu de 20) et laisse se concentrer sur la route, mais limite le permis aux véhicules automatiques. La boîte manuelle permet de tout conduire. Une passerelle de 7 heures permet de passer de l’une à l’autre.',
+  },
+  {
+    question: 'Conduite accompagnée ou formation classique ?',
+    reponse:
+      'La conduite accompagnée commence dès 15 ans et donne beaucoup d’expérience avant l’examen, avec une période probatoire de 2 ans au lieu de 3. Elle demande un accompagnateur disponible pendant au moins un an.',
+  },
+  {
+    question: 'Combien d’heures de conduite faut-il ?',
+    reponse:
+      'Le minimum est de 20 heures en boîte manuelle et 13 heures en automatique. Le nombre réel dépend de chacun : l’évaluation de départ en donne une première estimation.',
+  },
+  {
+    question: 'Quels sont les horaires des leçons ?',
+    reponse: 'Du lundi au samedi, de 7 h à 20 h, selon les créneaux disponibles.',
+  },
+]
+---
+
+<Base
+  titre="Permis auto : B, automatique, accompagnée"
+  description="Permis auto : permis B en boîte manuelle ou automatique, conduite accompagnée dès 15 ans, passerelle vers la boîte manuelle. Comparez et demandez un devis."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Nos formations">
+    <Fragment slot="titre">Les permis <span class="accent">auto</span></Fragment>
+    Boîte manuelle ou automatique, formation classique ou conduite accompagnée : choisissez le parcours qui correspond à
+    votre âge et à votre projet.
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/contact#demande">
+        Demander un devis <Icone nom="fleche" />
+      </a>
+      <a class="bouton bouton--contour-clair" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" /> Nous appeler
+      </a>
+    </Fragment>
+    <div slot="visuel" class="hub-visuel">
+      <Visuel motif="voiture" />
+    </div>
+  </HerosPage>
+
+  <section class="section" aria-labelledby="titre-liste">
+    <div class="conteneur">
+      <EnteteSection etiquette="Permis auto" id="titre-liste">
+        <Fragment slot="titre">Choisissez <span class="accent">votre formation</span></Fragment>
+        Chaque page détaille les prérequis, le déroulement, la durée, les documents et les financements possibles.
+      </EnteteSection>
+      <div class="hub-grille">
+        {
+          formations.map((f) => (
+            <CarteFormation
+              titre={f.nom}
+              resume={f.resume}
+              href={`/${f.slug}`}
+              motif={f.visuel}
+              niveau={3}
+            />
+          ))
+        }
+      </div>
+
+      <div class="hub-autres">
+        {
+          AUTRES_FORMULES_AUTO.map((a) => (
+            <div class="hub-autre">
+              <Icone nom="horloge" />
+              <div>
+                <h3>{a.nom}</h3>
+                <p>{a.texte}</p>
+              </div>
+              <a class="lien-fleche" href="/contact#demande">
+                Se renseigner <Icone nom="fleche" />
+              </a>
+            </div>
+          ))
+        }
+        <div class="hub-autre">
+          <Icone nom="panneau" />
+          <div>
+            <h3>Code de la route</h3>
+            <p>L’épreuve théorique, première étape de tout permis voiture.</p>
+          </div>
+          <a class="lien-fleche" href="/code-de-la-route">
+            Voir la formation <Icone nom="fleche" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris" aria-labelledby="titre-comparatif">
+    <div class="conteneur">
+      <EnteteSection etiquette="Comparatif" id="titre-comparatif">
+        <Fragment slot="titre">Les formules <span class="accent">en un coup d’œil</span></Fragment>
+        Les minimums réglementaires : le nombre d’heures réellement nécessaire dépend de chaque élève.
+      </EnteteSection>
+      <Comparatif
+        legende="Comparatif des formations au permis auto"
+        colonnes={['Âge', 'Formation minimale', 'Examen', 'Période probatoire']}
+        lignes={lignes}
+      />
+    </div>
+  </section>
+
+  <Questions questions={questions} id="titre-faq-auto" etiquette="Permis auto" titreDebut="Bien" titreAccent="choisir" />
+  <AppelFinal />
+</Base>

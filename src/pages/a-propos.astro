@@ -1,0 +1,346 @@
+---
+import { Picture } from 'astro:assets'
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Etoiles from '../components/ui/Etoiles.astro'
+import Icone from '../components/ui/Icone.astro'
+import Scene from '../components/ui/Scene.astro'
+import Visuel from '../components/ui/Visuel.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { noteFr } from '../lib/format.ts'
+
+const e = ETABLISSEMENT
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'À propos', href: '/a-propos' },
+]
+---
+
+<Base
+  titre={`Votre auto-école à ${e.adresse.ville}, depuis ${e.anneeCreation}`}
+  description={`${e.nom}, auto-école et moto-école de quartier depuis ${e.anneeCreation} : notre histoire, notre démarche, nos locaux, et comment se passent les formations.`}
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="À propos">
+    <Fragment slot="titre">À vos côtés <span class="accent">depuis {e.anneeCreation}</span></Fragment>
+    Une auto-école et moto-école de quartier, au {e.adresse.rue}, qui accompagne ses élèves du code jusqu’au permis.
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/contact">Venir nous rencontrer <Icone nom="fleche" /></a>
+    </Fragment>
+    <div slot="visuel" class="apropos-visuel">
+      <Scene />
+    </div>
+  </HerosPage>
+
+  <section class="section" aria-labelledby="titre-histoire">
+    <div class="conteneur deux-colonnes">
+      <div>
+        <EnteteSection etiquette="Notre histoire" id="titre-histoire">
+          <Fragment slot="titre">Une adresse <span class="accent">de confiance</span></Fragment>
+        </EnteteSection>
+      </div>
+      <div class="texte-long">
+        <p>
+          {e.nom} accueille ses élèves depuis {e.anneeCreation}, au {e.adresse.rue}. Code de
+          la route, permis voiture en boîte manuelle ou automatique, conduite accompagnée, permis moto : toutes les
+          formations se préparent au même endroit.
+        </p>
+        <p>
+          Notre rôle est simple : vous orienter vers la formation qui vous correspond, vous expliquer chaque démarche, et
+          vous faire progresser jusqu’à l’examen, à votre rythme. Les leçons de conduite ont lieu du lundi au samedi, de
+          7 h à 20 h, pour s’adapter aux emplois du temps des lycéens, des étudiants comme des actifs.
+        </p>
+        {
+          e.noteGoogle && (
+            <p class="note-ligne">
+              <Etoiles note={e.noteGoogle.note} />
+              <span>
+                <strong>{noteFr(e.noteGoogle.note)}/5</strong> sur {e.noteGoogle.nombreAvis} avis Google.{' '}
+                <a href="/avis-clients">Lire les avis</a>
+              </span>
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris" aria-labelledby="titre-engagement">
+    <div class="conteneur">
+      <EnteteSection etiquette="Notre démarche" id="titre-engagement">
+        <Fragment slot="titre">Apprendre à conduire, <span class="accent">en sécurité</span></Fragment>
+      </EnteteSection>
+      <ul class="engagements">
+        <li>
+          <Icone nom="livre" />
+          <h3>Le programme officiel</h3>
+          <p>
+            Chaque formation suit le référentiel national : maniement du véhicule, lecture de la route, partage de la
+            route avec les autres usagers, conduite autonome.
+          </p>
+        </li>
+        <li>
+          <Icone nom="volant" />
+          <h3>Une évaluation pour commencer</h3>
+          <p>
+            Avant la formation pratique, l’évaluation de départ estime le volume d’heures adapté à votre profil. Elle
+            sert de base au devis.
+          </p>
+        </li>
+        <li>
+          <Icone nom="bouclier" />
+          <h3>La sécurité avant tout</h3>
+          <p>
+            Anticiper, partager la route, connaître les gestes de premiers secours : l’objectif n’est pas seulement
+            l’examen, mais une conduite sûre pour longtemps.
+          </p>
+        </li>
+      </ul>
+
+      {
+        e.labels.length > 0 && (
+          <div class="labels">
+            <h3 class="labels__titre">Démarche qualité</h3>
+            <ul>
+              {e.labels.map((l) => (
+                <li>
+                  <Icone nom="label" />
+                  <span>
+                    <strong>{l.nom}</strong>
+                    {l.detail}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p class="texte-doux labels__agrement">
+              Établissement agréé par la préfecture, n° {e.agrement}. <a href="/demarche-qualite">Notre démarche qualité</a>
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="titre-locaux">
+    <div class="conteneur deux-colonnes deux-colonnes--centre">
+      <div class="locaux-photo">
+        <Visuel motif="duo" />
+      </div>
+      <div>
+        <EnteteSection etiquette="Nos locaux" id="titre-locaux">
+          <Fragment slot="titre">Un accueil <span class="accent">pour échanger</span></Fragment>
+        </EnteteSection>
+        <div class="texte-long">
+          <p>
+            Notre agence vous reçoit aux horaires du bureau : du lundi au vendredi de 10 h à 12 h et de 15 h à 20 h, le
+            samedi de 10 h à 12 h. C’est là que se préparent l’inscription, le dossier, et le planning de vos leçons.
+          </p>
+          <p>
+            Passez nous voir pour parler de votre projet : nous vous expliquons les formations, les délais et les
+            solutions de financement.
+          </p>
+        </div>
+        <div class="boutons locaux-boutons">
+          <a class="bouton" href={e.google.itineraire} target="_blank" rel="noopener">
+            <Icone nom="itineraire" /> Obtenir un itinéraire
+            <span class="visuellement-masque">(Google Maps, nouvel onglet)</span>
+          </a>
+          <a class="bouton bouton--contour" href="/documents-inscription">Préparer mon dossier</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    e.equipe.length > 0 && (
+      <section class="section section--gris" aria-labelledby="titre-equipe">
+        <div class="conteneur">
+          <EnteteSection etiquette="L’équipe" id="titre-equipe">
+            <Fragment slot="titre">
+              Ceux qui vous <span class="accent">accompagnent</span>
+            </Fragment>
+          </EnteteSection>
+          <ul class="equipe">
+            {e.equipe.map((p) => (
+              <li>
+                {p.photo && <Picture src={p.photo} formats={['avif', 'webp']}
+          fallbackFormat="jpg" widths={[320]} alt={`${p.prenom}, ${p.role}`} />}
+                <strong>{p.prenom}</strong>
+                <span>{p.role}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <AppelFinal />
+</Base>
+
+<style>
+  .apropos-visuel {
+    overflow: hidden;
+    border-radius: var(--rayon-l);
+    clip-path: polygon(7% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .apropos-visuel :global(.scene) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .deux-colonnes {
+    display: grid;
+    gap: var(--e-6);
+  }
+
+  .texte-long {
+    max-width: var(--largeur-texte);
+    color: var(--texte-doux);
+    font-size: 1.05rem;
+  }
+
+  .note-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3);
+    margin-block-start: var(--e-6);
+    padding: var(--e-4) var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--gris);
+    color: var(--encre);
+  }
+
+  .note-ligne :global(.etoiles) {
+    font-size: 1.2rem;
+  }
+
+  .engagements {
+    display: grid;
+    gap: var(--e-5);
+    list-style: none;
+  }
+
+  .engagements li {
+    padding: var(--e-5);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+  }
+
+  .engagements :global(svg) {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-block-end: var(--e-4);
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--petrole-clair);
+  }
+
+  .engagements h3 {
+    margin-block-end: var(--e-2);
+    font-size: 1.4rem;
+  }
+
+  .engagements p {
+    color: var(--texte-doux);
+  }
+
+  .labels {
+    margin-block-start: var(--e-7);
+    padding: var(--e-5);
+    border: 2px dashed var(--bord-champ);
+    border-radius: var(--rayon);
+  }
+
+  .labels__titre {
+    margin-block-end: var(--e-4);
+    font-size: 1.4rem;
+  }
+
+  .labels ul {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .labels li {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: var(--e-3);
+  }
+
+  .labels li :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--petrole-fonce);
+  }
+
+  .labels strong {
+    display: block;
+  }
+
+  .labels__agrement {
+    margin-block-start: var(--e-4);
+    font-size: var(--taille-petit);
+  }
+
+  .locaux-photo :global(.visuel) {
+    width: 100%;
+    max-width: 26rem;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--rayon-l);
+    box-shadow: var(--ombre-forte);
+  }
+
+  .locaux-boutons {
+    margin-block-start: var(--e-6);
+  }
+
+  .equipe {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--e-5);
+    list-style: none;
+  }
+
+  .equipe li {
+    display: grid;
+    gap: var(--e-1);
+  }
+
+  .equipe :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--rayon);
+    margin-block-end: var(--e-3);
+  }
+
+  @media (min-width: 40rem) {
+    .engagements {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .labels ul {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .deux-colonnes {
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: var(--e-8);
+    }
+
+    .deux-colonnes--centre {
+      align-items: center;
+    }
+  }
+</style>

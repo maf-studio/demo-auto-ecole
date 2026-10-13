@@ -1,0 +1,291 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { DOCUMENTS_PUBLIES } from '../data/qualite.ts'
+
+const e = ETABLISSEMENT
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'À propos', href: '/a-propos' },
+  { libelle: 'Démarche qualité', href: '/demarche-qualite' },
+]
+const criteres = [
+  'Des objectifs de formation identifiés et adaptés à chaque élève',
+  'Un accueil, un suivi et une évaluation adaptés',
+  'Des moyens pédagogiques et d’encadrement adaptés à l’offre',
+  'Des enseignants qualifiés, qui se forment en continu',
+  'Une information claire du public sur l’offre, les délais et les résultats',
+  'La prise en compte de l’avis des élèves',
+]
+---
+
+<Base
+  titre="Démarche qualité : label et certification"
+  description="La démarche qualité de Votre Auto-École : label École conduite qualité, certification Qualiopi, agrément préfectoral et réclamations."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="À propos">
+    <Fragment slot="titre">Notre démarche <span class="accent">qualité</span></Fragment>
+    Un label de l’État, une certification qualité et un agrément préfectoral : ce qu’ils garantissent, et comment nous
+    joindre pour toute remarque.
+  </HerosPage>
+
+  <section class="section" aria-labelledby="titre-labels">
+    <div class="conteneur">
+      <EnteteSection etiquette="Labels et certification" id="titre-labels">
+        <Fragment slot="titre">Ce qui est <span class="accent">contrôlé</span></Fragment>
+      </EnteteSection>
+      <div class="labels-grille">
+        {
+          e.labels.map((l) => (
+            <article class="carte label-carte">
+              <span class="label-carte__icone">
+                <Icone nom="label" />
+              </span>
+              <h3>{l.nom}</h3>
+              <p class="label-carte__detail">{l.detail}</p>
+              <p class="texte-doux">{l.explication}</p>
+              {l.lien && (
+                <a class="lien-fleche" href={l.lien} target="_blank" rel="noopener">
+                  Le texte du label <Icone nom="externe" />
+                  <span class="visuellement-masque">(nouvel onglet)</span>
+                </a>
+              )}
+            </article>
+          ))
+        }
+        <article class="carte label-carte">
+          <span class="label-carte__icone"><Icone nom="bouclier" /></span>
+          <h3>Agrément préfectoral</h3>
+          <p class="label-carte__detail">N° {e.agrement}</p>
+          <p class="texte-doux">L’agrément de la préfecture est obligatoire pour enseigner la conduite contre rémunération.</p>
+        </article>
+        {
+          e.garantieFinanciere && (
+            <article class="carte label-carte">
+              <span class="label-carte__icone">
+                <Icone nom="euro" />
+              </span>
+              <h3>Garantie financière</h3>
+              {e.garantieFinanciere.garant && <p class="label-carte__detail">Garant : {e.garantieFinanciere.garant}</p>}
+              <p class="texte-doux">
+                Les prestations payées d’avance et non consommées sont remboursées si l’école ne peut plus assurer la
+                formation (fermeture définitive ou d’au moins trois mois).
+              </p>
+            </article>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris" aria-labelledby="titre-criteres">
+    <div class="conteneur deux-col">
+      <EnteteSection etiquette="Le label en détail" id="titre-criteres">
+        <Fragment slot="titre">Les critères du <span class="accent">label</span></Fragment>
+        Le label « qualité des formations au sein des écoles de conduite » (arrêté du 26 février 2018) repose sur six
+        critères.
+      </EnteteSection>
+      <ol class="criteres">
+        {
+          criteres.map((c, i) => (
+            <li>
+              <span class="criteres__rang" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span>{c}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="titre-docs">
+    <div class="conteneur deux-col">
+      <div>
+        <EnteteSection etiquette="Documents" id="titre-docs">
+          <Fragment slot="titre">Informations <span class="accent">pratiques</span></Fragment>
+        </EnteteSection>
+        {
+          DOCUMENTS_PUBLIES.length > 0 ? (
+            <ul class="docs">
+              {DOCUMENTS_PUBLIES.map((d) => (
+                <li>
+                  <a href={d.fichier!} download>
+                    <Icone nom="document" />
+                    {d.titre} <span class="texte-doux">(PDF)</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="texte-doux">
+              Règlement intérieur, procédures d’évaluation, organisation de la formation, déroulement des examens : pour
+              consulter ces documents, demandez-les à l’accueil ou par e-mail.
+            </p>
+          )
+        }
+      </div>
+      <div class="encarts">
+        <div class="carte encart">
+          <h3>Une remarque, une réclamation ?</h3>
+          <p class="texte-doux">
+            Écrivez-nous en précisant votre nom et votre formation, ou passez à l’accueil aux horaires du bureau.
+          </p>
+          <a class="lien-fleche" href={`mailto:${e.email}?subject=${encodeURIComponent('Réclamation')}`}>
+            {e.email} <Icone nom="fleche" />
+          </a>
+        </div>
+        <div class="carte encart">
+          <h3>Une situation de handicap ?</h3>
+          <p class="texte-doux">Signalez-la dès le premier contact, pour que nous puissions vous orienter.</p>
+          <a class="lien-fleche" href={e.telephone.lien}>{e.telephone.affiche} <Icone nom="fleche" /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <AppelFinal />
+</Base>
+
+<style>
+  .labels-grille {
+    display: grid;
+    gap: var(--e-4);
+  }
+
+  .label-carte {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    padding: var(--e-6) var(--e-5) var(--e-5);
+    box-shadow: none;
+  }
+
+  .label-carte__icone {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 4px solid var(--or);
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--or);
+  }
+
+  .label-carte__icone :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .label-carte h3 {
+    font-size: 1.5rem;
+  }
+
+  .label-carte__detail {
+    font-weight: 700;
+  }
+
+  .label-carte .lien-fleche {
+    margin-block-start: auto;
+    font-size: 1rem;
+  }
+
+  .deux-col {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+
+  .criteres {
+    display: grid;
+    gap: var(--e-3);
+    list-style: none;
+  }
+
+  .criteres li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: var(--e-4);
+    align-items: center;
+    padding: var(--e-4);
+    border-radius: var(--rayon);
+    background: var(--blanc);
+    font-weight: 600;
+  }
+
+  .criteres__rang {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 4px solid var(--petrole-fonce);
+    border-radius: 50%;
+    font-family: var(--police-titre);
+    font-weight: 800;
+  }
+
+  .docs {
+    display: grid;
+    gap: var(--e-3);
+    list-style: none;
+  }
+
+  .docs a {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    font-weight: 600;
+  }
+
+  .docs :global(svg) {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .encarts {
+    display: grid;
+    gap: var(--e-4);
+  }
+
+  .encart {
+    display: grid;
+    gap: var(--e-3);
+    justify-items: start;
+    padding: var(--e-5);
+    box-shadow: none;
+  }
+
+  .encart h3 {
+    font-size: 1.4rem;
+  }
+
+  .encart .lien-fleche {
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--police-texte);
+  }
+
+  @media (min-width: 40rem) {
+    .labels-grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .labels-grille {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .deux-col {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--e-8);
+    }
+  }
+</style>

@@ -1,0 +1,287 @@
+---
+import Base from '../layouts/Base.astro'
+import AppelFinal from '../components/sections/AppelFinal.astro'
+import HerosPage from '../components/sections/HerosPage.astro'
+import EnteteSection from '../components/ui/EnteteSection.astro'
+import Icone from '../components/ui/Icone.astro'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { financement } from '../data/financements.ts'
+import { FORMATIONS_PUBLIEES, prixAffiche, type Categorie } from '../data/formations.ts'
+import { euros } from '../lib/format.ts'
+
+/**
+ * Les formules et leurs prix, lus dans `formations.ts` (`tarifs`). Un prix ne
+ * s’affiche que s’il est confirmé (`verifie: true`) ; sinon « Tarif sur
+ * demande ». Modifier un prix = modifier la donnée, jamais cette page.
+ */
+const filAriane = [
+  { libelle: 'Accueil', href: '/' },
+  { libelle: 'Tarifs et devis', href: '/tarifs' },
+]
+
+const rubriques: Array<{ cle: Categorie; titre: string }> = [
+  { cle: 'code', titre: 'Code de la route' },
+  { cle: 'auto', titre: 'Permis auto' },
+  { cle: 'moto', titre: 'Permis moto' },
+]
+const tousSurDemande = FORMATIONS_PUBLIEES.every((f) => f.tarifs.every((t) => prixAffiche(t) === null))
+---
+
+<Base
+  titre="Tarifs auto-école : formules et devis"
+  description="Formules et tarifs de Votre Auto-École : code, permis B, boîte automatique, conduite accompagnée, permis moto. Devis personnalisé, prix TTC."
+  filAriane={filAriane}
+>
+  <HerosPage filAriane={filAriane} surTitre="Tarifs et devis">
+    <Fragment slot="titre">Nos formules <span class="accent">et tarifs</span></Fragment>
+    Le prix d’un permis dépend de la formation choisie et du nombre d’heures dont vous aurez besoin. Demandez un devis :
+    il détaille chaque prestation et son prix TTC.
+    <Fragment slot="actions">
+      <a class="bouton bouton--clair" href="/contact#demande">
+        Obtenir un devis personnalisé <Icone nom="fleche" />
+      </a>
+      <a class="bouton bouton--contour-clair" href={ETABLISSEMENT.telephone.lien}>
+        <Icone nom="telephone" /> Nous appeler
+      </a>
+    </Fragment>
+  </HerosPage>
+
+  {
+    rubriques.map((r, i) => {
+      const formations = FORMATIONS_PUBLIEES.filter((f) => f.categorie === r.cle)
+      return (
+        <section class:list={['section section--serree', { 'section--gris': i % 2 === 1 }]} aria-labelledby={`tarifs-${r.cle}`}>
+          <div class="conteneur">
+            <h2 id={`tarifs-${r.cle}`} class="rubrique-titre">
+              {r.titre}
+            </h2>
+            <ul class="formules">
+              {formations.flatMap((f) =>
+                f.tarifs.map((t) => {
+                  const prix = prixAffiche(t)
+                  return (
+                    <li class="formule carte" data-revele>
+                      <div class="formule__tete">
+                        <h3 class="formule__nom">{f.tarifs.length > 1 ? t.libelle : f.nom}</h3>
+                        <p class="formule__description">{f.resume}</p>
+                      </div>
+                      <div class="formule__prix">
+                        {prix !== null ? (
+                          <>
+                            <span class="formule__montant">{euros(prix)}</span>
+                            <span class="formule__ttc">TTC{t.volume && ` · ${t.volume}`}</span>
+                          </>
+                        ) : (
+                          <span class="formule__demande">Tarif sur demande</span>
+                        )}
+                      </div>
+                      <ul class="formule__financements" aria-label="Financements possibles">
+                        {f.financements.map((id) => (
+                          <li>{financement(id).titre.replace(/^Le |^Les /, '')}</li>
+                        ))}
+                      </ul>
+                      <div class="formule__actions">
+                        <a class="bouton bouton--petit" href={`/contact?formation=${f.slug}#demande`}>
+                          Obtenir un devis
+                        </a>
+                        <a class="lien-fleche" href={`/${f.slug}`}>
+                          La formation <Icone nom="fleche" />
+                        </a>
+                      </div>
+                    </li>
+                  )
+                }),
+              )}
+            </ul>
+          </div>
+        </section>
+      )
+    })
+  }
+
+  <section class="section" aria-labelledby="titre-prix">
+    <div class="conteneur prix-explications">
+      <EnteteSection etiquette="Bon à savoir" id="titre-prix">
+        <Fragment slot="titre">Ce qui fait <span class="accent">varier le prix</span></Fragment>
+      </EnteteSection>
+      <ul class="explications">
+        <li>
+          <Icone nom="volant" />
+          <h3>L’évaluation de départ</h3>
+          <p>Obligatoire avant la formation pratique, elle estime le nombre d’heures adapté à votre profil.</p>
+        </li>
+        <li>
+          <Icone nom="horloge" />
+          <h3>Le nombre d’heures</h3>
+          <p>La loi fixe un minimum (20 heures en boîte manuelle, 13 en automatique) ; chacun avance à son rythme.</p>
+        </li>
+        <li>
+          <Icone nom="vitesses" />
+          <h3>La boîte de vitesses</h3>
+          <p>Boîte manuelle ou automatique : le minimum d’heures, et donc le budget, ne sont pas les mêmes.</p>
+        </li>
+        <li>
+          <Icone nom="tirelire" />
+          <h3>Le financement</h3>
+          <p>Paiement en 3 fois sans frais, permis à 1 € par jour, CPF selon votre situation.</p>
+          <a class="lien-fleche" href="/financement">Les solutions <Icone nom="fleche" /></a>
+        </li>
+      </ul>
+      <p class="mention-prix texte-doux">
+        {
+          tousSurDemande
+            ? 'Les prix sont communiqués sur devis, toutes taxes comprises.'
+            : 'Prix toutes taxes comprises (TTC). Les forfaits sont exprimés en leçons : le devis précise leur durée et détaille chaque prestation.'
+        }
+      </p>
+    </div>
+  </section>
+
+  <AppelFinal titre="Votre devis," accent="sans attendre" texte="Dites-nous quelle formation vous intéresse : nous établissons un devis détaillé, prix TTC." />
+</Base>
+
+<style>
+  .rubrique-titre {
+    margin-block-end: var(--e-6);
+    font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.7rem);
+  }
+
+  .formules {
+    display: grid;
+    gap: var(--e-4);
+    list-style: none;
+  }
+
+  .formule {
+    display: grid;
+    gap: var(--e-4);
+    padding: var(--e-5);
+    overflow: hidden;
+  }
+
+  .formule::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 4px;
+    background-image: repeating-linear-gradient(90deg, var(--petrole) 0 16px, transparent 16px 26px);
+  }
+
+  .formule__nom {
+    font-size: 1.5rem;
+  }
+
+  .formule__description {
+    margin-block-start: var(--e-2);
+    color: var(--texte-doux);
+    font-size: 0.95rem;
+  }
+
+  .formule__prix {
+    display: grid;
+    padding-block: var(--e-3);
+    border-block: 1px dashed var(--filet);
+  }
+
+  .formule__montant {
+    font-family: var(--police-titre);
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--nuit);
+  }
+
+  .formule__ttc {
+    font-size: var(--taille-petit);
+    color: var(--texte-doux);
+  }
+
+  .formule__demande {
+    font-family: var(--police-titre);
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--petrole-fonce);
+  }
+
+  .formule__financements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+    list-style: none;
+  }
+
+  .formule__financements li {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--ciel-voile);
+    color: var(--petrole-tres-fonce);
+    font-size: var(--taille-mini);
+    font-weight: 700;
+  }
+
+  .formule__financements li::first-letter {
+    text-transform: uppercase;
+  }
+
+  .formule__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-3);
+    margin-block-start: auto;
+  }
+
+  .explications {
+    display: grid;
+    gap: var(--e-5);
+    list-style: none;
+  }
+
+  .explications li {
+    display: grid;
+    gap: var(--e-2);
+    align-content: start;
+  }
+
+  .explications :global(svg) {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    color: var(--petrole-fonce);
+  }
+
+  .explications h3 {
+    font-size: 1.35rem;
+  }
+
+  .explications p {
+    color: var(--texte-doux);
+  }
+
+  .mention-prix {
+    margin-block-start: var(--e-6);
+    font-size: var(--taille-petit);
+  }
+
+  @media (min-width: 40rem) {
+    .formules,
+    .explications {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .formules {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .explications {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

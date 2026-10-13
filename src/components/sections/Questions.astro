@@ -1,0 +1,192 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+import Icone from '../ui/Icone.astro'
+import type { Question } from '../../data/faq.ts'
+
+/**
+ * Questions fréquentes en accordéon (`details`, sans JavaScript). Une seule
+ * question ouverte à la fois (`name`). Pas de données structurées FAQPage :
+ * Google ne les affiche plus pour ce type de site.
+ */
+interface Props {
+  questions: readonly Question[]
+  id: string
+  etiquette?: string
+  titreAccent?: string
+  titreDebut?: string
+  fond?: 'blanc' | 'gris'
+}
+
+const {
+  questions,
+  id,
+  etiquette = 'Questions fréquentes',
+  titreDebut = 'Vos questions,',
+  titreAccent = 'nos réponses',
+  fond = 'blanc',
+} = Astro.props
+---
+
+<section class:list={['section questions', { 'section--gris': fond === 'gris' }]} aria-labelledby={id}>
+  <div class="conteneur questions__grille">
+    <div class="questions__intro">
+      <EnteteSection etiquette={etiquette} id={id}>
+        <Fragment slot="titre">{titreDebut}{' '}<span class="accent">{titreAccent}</span></Fragment>
+      </EnteteSection>
+      <slot />
+    </div>
+    <div class="questions__liste">
+      {
+        questions.map((q, i) => (
+          <details class="question" name={id} open={i === 0}>
+            <summary>
+              <span>{q.question}</span>
+              <span class="question__signe" aria-hidden="true" />
+            </summary>
+            <div class="question__reponse">
+              <p>{q.reponse}</p>
+              {q.lien && (
+                <a
+                  class="lien-fleche question__lien"
+                  href={q.lien.href}
+                  {...(q.lien.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+                >
+                  {q.lien.libelle}
+                  <Icone nom={q.lien.href.startsWith('http') ? 'externe' : 'fleche'} />
+                </a>
+              )}
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .questions__grille {
+    display: grid;
+    gap: var(--e-6);
+  }
+
+  .questions__intro :global(.entete-section) {
+    margin-block-end: var(--e-5);
+  }
+
+  .questions__liste {
+    border-block-start: 1px solid var(--filet);
+  }
+
+  .question {
+    border-block-end: 1px solid var(--filet);
+  }
+
+  .question summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-4);
+    min-height: 3.5rem;
+    padding-block: var(--e-4);
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .question summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .question summary:hover {
+    color: var(--petrole-fonce);
+  }
+
+  .question__signe {
+    position: relative;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--ciel);
+    transition: background-color var(--duree) var(--courbe), transform var(--duree) var(--courbe);
+  }
+
+  .question__signe::before,
+  .question__signe::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    width: 0.8rem;
+    height: 2px;
+    background: var(--petrole-fonce);
+    transform: translate(-50%, -50%);
+  }
+
+  .question__signe::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+    transition: transform var(--duree) var(--courbe);
+  }
+
+  .question[open] .question__signe {
+    background: var(--petrole-fonce);
+  }
+
+  .question[open] .question__signe::before,
+  .question[open] .question__signe::after {
+    background: var(--blanc);
+  }
+
+  .question[open] .question__signe::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  .question__reponse {
+    display: grid;
+    gap: var(--e-3);
+    padding-block-end: var(--e-5);
+    padding-inline-end: var(--e-7);
+    color: var(--texte-doux);
+  }
+
+  .question__lien {
+    justify-self: start;
+    font-size: 1rem;
+  }
+
+  /* Ouverture animée là où le navigateur la permet. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (interpolate-size: allow-keywords) {
+      .question {
+        interpolate-size: allow-keywords;
+      }
+
+      .question::details-content {
+        height: 0;
+        overflow: clip;
+        transition:
+          height var(--duree) var(--courbe),
+          content-visibility var(--duree) allow-discrete;
+      }
+
+      .question[open]::details-content {
+        height: auto;
+      }
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .questions__grille {
+      grid-template-columns: 0.85fr 1.5fr;
+      gap: var(--e-8);
+      align-items: start;
+    }
+
+    .questions__intro {
+      position: sticky;
+      inset-block-start: calc(var(--entete) + 2rem);
+    }
+  }
+</style>

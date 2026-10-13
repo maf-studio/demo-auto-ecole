@@ -1,0 +1,183 @@
+---
+import { Font, getImage } from 'astro:assets'
+
+import '../styles/global.css'
+import BarreMobile from '../components/layout/BarreMobile.astro'
+import EnTete from '../components/layout/EnTete.astro'
+import PiedDePage from '../components/layout/PiedDePage.astro'
+import Icone from '../components/ui/Icone.astro'
+import partageDefaut from '../assets/partage.png'
+import { AUTEUR_DEMONSTRATION, DEMONSTRATION } from '../data/demonstration.ts'
+import { ETABLISSEMENT } from '../data/etablissement.ts'
+import { ecoleJsonLd, filArianeJsonLd } from '../lib/donnees-structurees.ts'
+import { siteIndexable, titreComplet } from '../lib/seo.ts'
+
+interface Props {
+  /** Titre de la page, sans le nom de l’établissement. `null` : l’accueil. */
+  titre: string | null
+  /** Meta description, de 120 à 160 caractères. */
+  description: string
+  /** Page tenue hors de l’index (pages légales, brouillons, confirmations). */
+  noindex?: boolean
+  /** Fil d’Ariane, publié aussi en données structurées. */
+  filAriane?: ReadonlyArray<{ libelle: string; href: string }>
+  /** Image de partage (Open Graph) ; l’image du site par défaut. */
+  image?: ImageMetadata
+}
+
+const { titre, description, noindex = false, filAriane, image = partageDefaut } = Astro.props
+
+const site = Astro.site ?? new URL(Astro.url.origin)
+const chemin = Astro.url.pathname.replace(/\/$/, '') || '/'
+const canonique = new URL(chemin, site).href
+const indexable = siteIndexable(Astro.site) && !noindex
+const titreFinal = titreComplet(titre)
+
+const partage = await getImage({ src: image, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 82 })
+const imagePartage = new URL(partage.src, site).href
+
+const jsonLd = [
+  ecoleJsonLd(site, imagePartage),
+  ...(filAriane && filAriane.length > 1 ? [filArianeJsonLd(site, filAriane)] : []),
+]
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreFinal}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonique} />
+    <meta name="robots" content={indexable ? 'index, follow, max-image-preview:large' : 'noindex, nofollow'} />
+    <meta name="theme-color" content="#071d2b" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={ETABLISSEMENT.nom} />
+    <meta property="og:title" content={titreFinal} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonique} />
+    <meta property="og:image" content={imagePartage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${ETABLISSEMENT.nom} : code de la route, permis auto et permis moto`} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-titre" preload />
+    <Font cssVariable="--font-titre-italique" />
+    <Font cssVariable="--font-texte" preload />
+    <Font cssVariable="--font-signature" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+    {
+      DEMONSTRATION && (
+        <p class="demonstration">
+          <strong>Site de démonstration</strong>
+          <span>
+            Nom, coordonnées, avis et prix sont des exemples. Conception :{' '}
+            <a href={AUTEUR_DEMONSTRATION.site} target="_blank" rel="noopener">
+              {AUTEUR_DEMONSTRATION.nom}
+              <span class="visuellement-masque"> (nouvel onglet)</span>
+            </a>
+          </span>
+        </p>
+      )
+    }
+    <EnTete />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <PiedDePage />
+    <BarreMobile />
+    <button class="haut-de-page" type="button" data-haut-de-page>
+      <Icone nom="fleche-haut" />
+      <span class="visuellement-masque">Revenir en haut de la page</span>
+    </button>
+    <script>
+      import '../scripts/site.ts'
+    </script>
+  </body>
+</html>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+
+  .demonstration {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 var(--e-2);
+    margin: 0;
+    padding: var(--e-2) var(--gouttiere);
+    background: var(--or);
+    color: var(--encre);
+    font-size: var(--taille-petit);
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .demonstration a {
+    color: inherit;
+    font-weight: 700;
+  }
+
+  .haut-de-page {
+    position: fixed;
+    inset-inline-end: var(--e-4);
+    inset-block-end: calc(var(--barre-mobile) + env(safe-area-inset-bottom, 0px) + var(--e-4));
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border: 1px solid var(--filet-nuit);
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--blanc);
+    box-shadow: var(--ombre-forte);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition:
+      opacity var(--duree) var(--courbe),
+      transform var(--duree) var(--courbe),
+      visibility 0s linear var(--duree);
+  }
+
+  .haut-de-page[data-visible] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .haut-de-page:hover {
+    background: var(--petrole-fonce);
+  }
+
+  .haut-de-page :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  @media (min-width: 64rem) {
+    .haut-de-page {
+      inset-inline-end: var(--e-6);
+      inset-block-end: var(--e-6);
+    }
+  }
+</style>

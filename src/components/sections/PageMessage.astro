@@ -1,0 +1,83 @@
+---
+import Icone, { type NomIcone } from '../ui/Icone.astro'
+
+/** Une page courte de message (confirmation, erreur, 404). */
+interface Props {
+  icone: NomIcone
+  ton?: 'succes' | 'erreur' | 'neutre'
+}
+const { icone, ton = 'neutre' } = Astro.props
+---
+
+<section class="message surface-nuit">
+  <div class="conteneur message__contenu">
+    <span class:list={['message__icone', `message__icone--${ton}`]}><Icone nom={icone} /></span>
+    <h1 class="message__titre"><slot name="titre" /></h1>
+    <div class="chapo message__texte"><slot /></div>
+    <div class="boutons message__actions"><slot name="actions" /></div>
+  </div>
+  <div class="message__route ligne-route" aria-hidden="true"></div>
+</section>
+
+<style>
+  .message {
+    position: relative;
+    padding-block: clamp(4rem, 3rem + 6vw, 8rem);
+    background:
+      radial-gradient(60% 80% at 50% 0%, rgb(57 139 164 / 0.3), transparent 70%),
+      var(--nuit);
+  }
+
+  .message__contenu {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .message__icone {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-block-end: var(--e-5);
+    border-radius: 50%;
+    background: var(--petrole-fonce);
+  }
+
+  .message__icone--succes {
+    background: var(--succes);
+  }
+
+  .message__icone--erreur {
+    background: var(--erreur);
+  }
+
+  .message__icone :global(svg) {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .message__titre {
+    font-size: var(--taille-h1);
+  }
+
+  .message__texte {
+    margin-block: var(--e-5) var(--e-6);
+    margin-inline: auto;
+  }
+
+  .message__texte :global(p + p) {
+    margin-block-start: var(--e-3);
+  }
+
+  .message__actions {
+    justify-content: center;
+  }
+
+  .message__route {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 1.25rem;
+    color: rgb(255 255 255 / 0.16);
+  }
+</style>

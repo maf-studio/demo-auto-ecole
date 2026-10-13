@@ -1,0 +1,111 @@
+---
+import EnteteSection from '../ui/EnteteSection.astro'
+import Icone from '../ui/Icone.astro'
+import Visuel from '../ui/Visuel.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+const e = ETABLISSEMENT
+---
+
+<section class="section section--gris a-propos" aria-labelledby="titre-a-propos">
+  <div class="conteneur a-propos__grille">
+    <figure class="a-propos__media" data-revele>
+      <Visuel motif="duo" class="a-propos__photo" />
+      <figcaption class="a-propos__macaron">
+        <span class="signature">depuis</span>
+        <strong>{e.anneeCreation}</strong>
+      </figcaption>
+    </figure>
+
+    <div class="a-propos__texte">
+      <EnteteSection etiquette="Bienvenue" id="titre-a-propos">
+        <Fragment slot="titre">Depuis {e.anneeCreation}, nous vous accompagnons vers <span class="accent">l’autonomie</span></Fragment>
+      </EnteteSection>
+      <p>
+        Installée au {e.adresse.rue}, à {e.adresse.ville}, {e.nom} prépare depuis {e.anneeCreation} au code de la
+        route, au permis voiture et au permis moto.
+      </p>
+      <p>
+        Que vous commenciez à 15 ans en conduite accompagnée, que vous passiez le permis B à l’âge adulte ou que vous
+        ajoutiez la moto à votre permis, nous vous orientons vers la formation adaptée et vous expliquons chaque
+        démarche, de l’évaluation de départ jusqu’au jour de l’examen.
+      </p>
+      <ul class="liste-coches a-propos__points">
+        <li><Icone nom="coche-cercle" /><span>Une expérience de plus de quinze ans</span></li>
+        <li><Icone nom="coche-cercle" /><span>La voiture et la moto au même endroit</span></li>
+        <li><Icone nom="coche-cercle" /><span>Une progression qui suit le programme officiel de formation</span></li>
+        <li><Icone nom="coche-cercle" /><span>La sécurité au cœur de chaque leçon</span></li>
+      </ul>
+      <a class="bouton bouton--contour" href="/a-propos">Découvrir notre auto-école</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .a-propos__grille {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 3vw, 5rem);
+    align-items: center;
+  }
+
+  .a-propos__media {
+    position: relative;
+    margin: 0;
+  }
+
+  .a-propos__media :global(.a-propos__photo) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--rayon-l);
+    box-shadow: var(--ombre-forte);
+  }
+
+  .a-propos__macaron {
+    position: absolute;
+    inset-inline-end: clamp(-0.5rem, -2vw, -1.5rem);
+    inset-block-end: -1.5rem;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    width: 7.5rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--nuit);
+    color: var(--blanc);
+    box-shadow: var(--ombre-forte);
+    transform: rotate(-8deg);
+    line-height: 1;
+  }
+
+  .a-propos__macaron .signature {
+    font-size: 1.25rem;
+    color: var(--petrole-clair);
+  }
+
+  .a-propos__macaron strong {
+    font-family: var(--police-titre);
+    font-size: 2.6rem;
+    font-weight: 800;
+  }
+
+  .a-propos__texte > p {
+    max-width: var(--largeur-texte);
+    color: var(--texte-doux);
+  }
+
+  .a-propos__texte :global(.entete-section) {
+    margin-block-end: var(--e-5);
+  }
+
+  .a-propos__points {
+    margin-block: var(--e-6);
+    font-weight: 600;
+  }
+
+  @media (min-width: 64rem) {
+    .a-propos__grille {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

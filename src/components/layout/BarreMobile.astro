@@ -1,0 +1,79 @@
+---
+import Icone from '../ui/Icone.astro'
+import { ETABLISSEMENT } from '../../data/etablissement.ts'
+
+/** Sur téléphone et tablette : appeler, voir les formations, demander un devis. */
+---
+
+<nav class="barre-mobile surface-nuit" aria-label="Actions rapides">
+  <a href={ETABLISSEMENT.telephone.lien}>
+    <Icone nom="telephone" />
+    <span>Appeler</span>
+  </a>
+  <a href="/#formations">
+    <Icone nom="volant" />
+    <span>Formations</span>
+  </a>
+  <a href="/contact#demande" class="barre-mobile__devis">
+    <Icone nom="document" />
+    <span>Devis</span>
+  </a>
+</nav>
+
+<style>
+  .barre-mobile {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: calc(var(--barre-mobile) + env(safe-area-inset-bottom, 0px));
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+    background: rgb(7 29 43 / 0.97);
+    border-block-start: 1px solid var(--filet-nuit);
+    box-shadow: 0 -10px 30px -18px rgb(0 0 0 / 0.5);
+  }
+
+  .barre-mobile a {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.2rem;
+    color: var(--sur-nuit);
+    font-family: var(--police-titre);
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .barre-mobile a + a {
+    border-inline-start: 1px solid var(--filet-nuit);
+  }
+
+  .barre-mobile svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--petrole-clair);
+  }
+
+  .barre-mobile .barre-mobile__devis {
+    background: var(--petrole-fonce);
+  }
+
+  .barre-mobile .barre-mobile__devis svg {
+    color: var(--blanc);
+  }
+
+  :global(html[data-menu-ouvert]) .barre-mobile {
+    visibility: hidden;
+  }
+
+  @media (min-width: 64rem) {
+    .barre-mobile {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,127 @@
+---
+import CarteFormation from '../ui/CarteFormation.astro'
+import EnteteSection from '../ui/EnteteSection.astro'
+import Icone from '../ui/Icone.astro'
+import { FORMATIONS_PUBLIEES, formation } from '../../data/formations.ts'
+
+const code = formation('code-de-la-route')
+const b = formation('permis-b')
+const auto = formation('permis-automatique')
+const PRINCIPALES = new Set([code.slug, b.slug, auto.slug])
+const secondaires = FORMATIONS_PUBLIEES.filter((f) => !PRINCIPALES.has(f.slug))
+---
+
+<section class="section formations" id="formations" aria-labelledby="titre-formations">
+  <div class="conteneur">
+    <EnteteSection etiquette="Nos formations" id="titre-formations">
+      <Fragment slot="titre">Le bon permis pour <span class="accent">chaque projet</span></Fragment>
+      Débutant ou déjà conducteur, découvrez la formation adaptée à vos besoins.
+    </EnteteSection>
+
+    <div class="formations__grille">
+      <CarteFormation titre={code.nom} resume={code.resume} href={`/${code.slug}`} motif="panneau" />
+      <CarteFormation titre={b.nomCourt} resume={b.resume} href={`/${b.slug}`} motif="voiture" />
+      <CarteFormation titre={auto.nomCourt} resume={auto.resume} href={`/${auto.slug}`} motif="automatique" />
+      <CarteFormation
+        titre="Permis moto"
+        resume="A1 dès 16 ans, A2 dès 18 ans, passerelle vers le A : prenez la route à deux roues."
+        href="/permis-moto"
+        motif="moto"
+        lienTexte="Découvrir les formations"
+      />
+    </div>
+
+    <div class="formations__autres">
+      <p class="formations__autres-titre">Et aussi</p>
+      <ul>
+        {
+          secondaires.map((f) => (
+            <li>
+              <a href={`/${f.slug}`}>
+                {f.nomCourt}
+                <Icone nom="fleche" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .formations {
+    padding-block-start: calc(var(--section) * 0.85);
+  }
+
+  .formations__grille {
+    display: grid;
+    gap: var(--e-5);
+  }
+
+  .formations__autres {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3) var(--e-5);
+    margin-block-start: var(--e-7);
+    padding-block-start: var(--e-5);
+    border-block-start: 2px dashed var(--filet);
+  }
+
+  .formations__autres-titre {
+    font-family: var(--police-titre);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .formations__autres ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2) var(--e-3);
+    list-style: none;
+  }
+
+  .formations__autres a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.95rem;
+    border: 1px solid var(--filet);
+    border-radius: 999px;
+    background: var(--blanc);
+    color: var(--encre);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition:
+      border-color var(--duree) var(--courbe),
+      background-color var(--duree) var(--courbe);
+  }
+
+  .formations__autres a:hover {
+    border-color: var(--petrole-fonce);
+    background: var(--ciel-voile);
+  }
+
+  .formations__autres :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--petrole-fonce);
+  }
+
+  @media (min-width: 40rem) {
+    .formations__grille {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .formations__grille {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
